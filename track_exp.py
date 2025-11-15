@@ -165,13 +165,32 @@ def save_exp_data(data: Dict):
         sys.exit(1)
 
 
-def send_discord_notification(character_name: str, char_data: Dict):
-    """Send Discord webhook notification for new character."""
+def send_discord_notification(character_name: str, char_data: Dict, notification_type: str = "new", old_data: Optional[Dict] = None):
+    """Send Discord webhook notification for character updates.
+
+    Args:
+        character_name: Name of the character
+        char_data: Current character data
+        notification_type: "new" for new character, "update" for experience change
+        old_data: Previous character data (for updates)
+    """
     if not DISCORD_WEBHOOK_URL:
         print("⚠ No Discord webhook URL configured, skipping notification")
         return
 
     try:
+        if notification_type == "new":
+            title = "🆕 New Character Tracked"
+            description = f"Started tracking **{character_name}**"
+            color = 3447003  # Blue
+        else:  # update
+            title = "📈 Experience Gained"
+            old_exp = old_data.get("experience", 0) if old_data else 0
+            new_exp = char_data.get("experience", 0)
+            exp_gained = new_exp - old_exp
+            description = f"**{character_name}** gained **{exp_gained:,}** experience!"
+            color = 5763719  # Green
+
         fields = [
             {
                 "name": "World",
@@ -187,26 +206,64 @@ def send_discord_notification(character_name: str, char_data: Dict):
                 "name": "Vocation",
                 "value": char_data.get("vocation", "Unknown"),
                 "inline": True
-            },
-            {
-                "name": "Experience",
-                "value": f"{char_data.get('experience', 0):,}",
-                "inline": False
             }
         ]
 
+        # For updates, show old and new experience
+        if notification_type == "update" and old_data:
+            old_exp = old_data.get("experience", 0)
+            new_exp = char_data.get("experience", 0)
+            exp_gained = new_exp - old_exp
+
+            fields.append({
+                "name": "Experience Change",
+                "value": f"{old_exp:,} → {new_exp:,} (+{exp_gained:,})",
+                "inline": False
+            })
+
+            # Show level change if applicable
+            old_level = old_data.get("level", 0)
+            new_level = char_data.get("level", 0)
+            if old_level != new_level:
+                level_gained = new_level - old_level
+                fields.append({
+                    "name": "Level Up!",
+                    "value": f"Level {old_level} → {new_level} (+{level_gained})",
+                    "inline": True
+                })
+        else:
+            # For new characters, just show current experience
+            fields.append({
+                "name": "Experience",
+                "value": f"{char_data.get('experience', 0):,}",
+                "inline": False
+            })
+
         # Add rank if available
         if "rank" in char_data and char_data["rank"] > 0:
+            rank_text = f"#{char_data['rank']}"
+
+            # Show rank change for updates
+            if notification_type == "update" and old_data and "rank" in old_data:
+                old_rank = old_data["rank"]
+                new_rank = char_data["rank"]
+                if old_rank != new_rank:
+                    rank_diff = old_rank - new_rank  # Positive if rank improved
+                    if rank_diff > 0:
+                        rank_text = f"#{new_rank} (↑{rank_diff})"
+                    else:
+                        rank_text = f"#{new_rank} (↓{abs(rank_diff)})"
+
             fields.append({
                 "name": "Highscore Rank",
-                "value": f"#{char_data['rank']}",
+                "value": rank_text,
                 "inline": True
             })
 
         embed = {
-            "title": "🆕 New Character Tracked",
-            "description": f"Started tracking **{character_name}**",
-            "color": 3447003,  # Blue color
+            "title": title,
+            "description": description,
+            "color": color,
             "fields": fields,
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
         }
@@ -221,7 +278,7 @@ def send_discord_notification(character_name: str, char_data: Dict):
             timeout=10
         )
         response.raise_for_status()
-        print(f"✓ Sent Discord notification for '{character_name}'")
+        print(f"✓ Sent Discord notification for '{character_name}' ({notification_type})")
     except Exception as e:
         print(f"✗ Error sending Discord notification: {e}")
 
@@ -241,6 +298,7 @@ def main():
 
     # Track each player
     new_characters = []
+    exp_changes = []
     updated_data = {}
 
     for player_name in players:
@@ -250,8 +308,9 @@ def main():
         char_data = get_character_data(player_name)
 
         if char_data:
-            # Check if this is a new character
+            # Check if this is a new character or an update
             is_new = player_name not in exp_data
+            old_data = exp_data.get(player_name, {})
 
             # Store the data
             updated_data[player_name] = {
@@ -273,6 +332,17 @@ def main():
             if is_new:
                 print(f"  ⭐ New character detected!")
                 new_characters.append((player_name, char_data))
+            else:
+                # Check if experience has changed
+                old_exp = old_data.get("experience", 0)
+                new_exp = char_data["experience"]
+
+                if old_exp != new_exp:
+                    exp_gained = new_exp - old_exp
+                    print(f"  📈 Experience changed: {old_exp:,} → {new_exp:,} ({exp_gained:+,})")
+                    exp_changes.append((player_name, char_data, old_data))
+                else:
+                    print(f"  ✓ No experience change")
 
         # Add delay to avoid rate limiting
         time.sleep(0.5)
@@ -280,19 +350,35 @@ def main():
     # Save updated data
     save_exp_data(updated_data)
 
-    # Send Discord notifications for new characters
+    # Send Discord notifications
+    notifications_sent = 0
+
+    # Notify for new characters
     if new_characters:
         print(f"\n{'=' * 60}")
         print(f"Sending notifications for {len(new_characters)} new character(s)")
         print("=" * 60)
         for char_name, char_data in new_characters:
-            send_discord_notification(char_name, char_data)
+            send_discord_notification(char_name, char_data, notification_type="new")
+            notifications_sent += 1
+            time.sleep(1)  # Delay between notifications
+
+    # Notify for experience changes
+    if exp_changes:
+        print(f"\n{'=' * 60}")
+        print(f"Sending notifications for {len(exp_changes)} experience change(s)")
+        print("=" * 60)
+        for char_name, char_data, old_data in exp_changes:
+            send_discord_notification(char_name, char_data, notification_type="update", old_data=old_data)
+            notifications_sent += 1
             time.sleep(1)  # Delay between notifications
 
     print(f"\n{'=' * 60}")
     print(f"✓ Tracking complete!")
     print(f"  Total characters tracked: {len(updated_data)}")
     print(f"  New characters: {len(new_characters)}")
+    print(f"  Experience changes: {len(exp_changes)}")
+    print(f"  Discord notifications sent: {notifications_sent}")
     print("=" * 60)
 
 

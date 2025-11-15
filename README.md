@@ -6,7 +6,11 @@ An automated experience tracker for Tibia characters using the TibiaData API. Th
 
 - **Automatic Tracking**: Monitors multiple Tibia characters automatically
 - **TibiaData Integration**: Uses the official TibiaData API v4 for accurate data
-- **Discord Notifications**: Sends notifications when new characters are tracked
+- **Discord Notifications**: Sends notifications for:
+  - New characters added to tracking
+  - Experience changes (gain/loss)
+  - Level changes
+  - Rank changes in highscores
 - **GitHub Actions**: Runs automatically on a schedule via GitHub Actions
 - **JSON Storage**: Stores experience data in a simple JSON format
 
@@ -23,9 +27,16 @@ An automated experience tracker for Tibia characters using the TibiaData API. Th
      - Level
      - Vocation
      - Highscore rank
-3. **Stores Data**: Saves the data to `exp.json`
-4. **Discord Notifications**: Sends a Discord webhook notification for newly tracked characters
-5. **Auto-Commits**: Updates the `exp.json` file in the repository automatically
+3. **Detects Changes**: Compares new data with stored data in `exp.json` to detect:
+   - New characters being tracked for the first time
+   - Experience changes (gains or losses)
+   - Level changes
+   - Rank changes
+4. **Discord Notifications**: Sends webhook notifications when:
+   - A new character is added to tracking (blue notification)
+   - Experience changes are detected (green notification with gain/loss details)
+5. **Stores Data**: Saves the updated data to `exp.json`
+6. **Auto-Commits**: Updates the `exp.json` file in the repository automatically
 
 ## Configuration
 
@@ -41,6 +52,17 @@ https://raw.githubusercontent.com/Ruslex1234/tibia-ops-config/refs/heads/main/.c
 The Discord webhook URL must be configured as a repository secret:
 - **Secret Name**: `WEBHOOK`
 - **Location**: Repository Settings → Secrets and variables → Actions
+
+#### Notification Types
+
+**New Character Tracked** (Blue)
+- Sent when a character is added to tracking for the first time
+- Shows: World, Level, Vocation, Experience, Rank
+
+**Experience Gained** (Green)
+- Sent when experience changes are detected
+- Shows: Experience change (old → new), Level changes (if applicable), Rank changes (if applicable)
+- Only triggers when experience value actually changes between checks
 
 ## Files
 
