@@ -47,7 +47,7 @@ The Discord webhook URL must be configured as a repository secret:
 ## Workflow Schedule
 
 The tracker runs automatically:
-- **Every hour** (on the hour)
+- **Every 30 minutes** (at :00 and :30 of each hour)
 - **Manual trigger** available via GitHub Actions UI
 
 ## Data Format
