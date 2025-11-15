@@ -2,57 +2,64 @@
   "Julio Warrior": {
     "name": "Julio Warrior",
     "world": "Firmera",
-    "experience": 0,
+    "experience": 12560917290,
     "level": 912,
-    "last_updated": "2025-11-15 03:42:28 UTC"
+    "vocation": "Elite Knight",
+    "rank": 41,
+    "last_updated": "2025-11-15 03:51:08 UTC"
   },
   "Julio Blocker": {
     "name": "Julio Blocker",
     "world": "Firmera",
-    "experience": 0,
+    "experience": 903805821,
     "level": 380,
-    "last_updated": "2025-11-15 03:42:29 UTC"
-  },
-  "Julio Mage": {
-    "name": "Julio Mage",
-    "world": "Firmera",
-    "experience": 0,
-    "level": 307,
-    "last_updated": "2025-11-15 03:42:30 UTC"
+    "vocation": "Elite Knight",
+    "rank": 697,
+    "last_updated": "2025-11-15 03:51:24 UTC"
   },
   "Udyr Tanker": {
     "name": "Udyr Tanker",
     "world": "Firmera",
-    "experience": 0,
+    "experience": 2053360229,
     "level": 499,
-    "last_updated": "2025-11-15 03:42:31 UTC"
+    "vocation": "Elite Knight",
+    "rank": 355,
+    "last_updated": "2025-11-15 03:51:48 UTC"
   },
   "Psycho Barbie": {
     "name": "Psycho Barbie",
     "world": "Firmera",
-    "experience": 0,
+    "experience": 922590957,
     "level": 383,
-    "last_updated": "2025-11-15 03:42:32 UTC"
+    "vocation": "Elder Druid",
+    "rank": 689,
+    "last_updated": "2025-11-15 03:52:00 UTC"
   },
   "Kuroashii": {
     "name": "Kuroashii",
     "world": "Firmera",
-    "experience": 0,
+    "experience": 3106593391,
     "level": 573,
-    "last_updated": "2025-11-15 03:42:33 UTC"
+    "vocation": "Knight",
+    "rank": 231,
+    "last_updated": "2025-11-15 03:52:05 UTC"
   },
   "Julio Warrior ba": {
     "name": "Julio Warrior ba",
     "world": "Firmera",
-    "experience": 0,
+    "experience": 3032802111,
     "level": 568,
-    "last_updated": "2025-11-15 03:42:34 UTC"
+    "vocation": "Elite Knight",
+    "rank": 238,
+    "last_updated": "2025-11-15 03:52:09 UTC"
   },
   "Julio Warrior baa": {
     "name": "Julio Warrior baa",
     "world": "Firmera",
-    "experience": 0,
+    "experience": 2135469793,
     "level": 506,
-    "last_updated": "2025-11-15 03:42:35 UTC"
+    "vocation": "Elite Knight",
+    "rank": 343,
+    "last_updated": "2025-11-15 03:52:16 UTC"
   }
 }
