@@ -13,11 +13,16 @@ An automated experience tracker for Tibia characters using the TibiaData API. Th
 ## How It Works
 
 1. **Fetches Player List**: Retrieves the list of players from the configured alerts.json
-2. **Queries TibiaData API**: For each player, fetches their character data including:
-   - Character name
-   - World
-   - Current experience
-   - Level
+2. **Queries TibiaData API**: For each player:
+   - Gets their world from the character API
+   - Searches through highscores pages to find the character
+   - Extracts accurate experience data including:
+     - Character name
+     - World
+     - Current experience (from highscores "value" field)
+     - Level
+     - Vocation
+     - Highscore rank
 3. **Stores Data**: Saves the data to `exp.json`
 4. **Discord Notifications**: Sends a Discord webhook notification for newly tracked characters
 5. **Auto-Commits**: Updates the `exp.json` file in the repository automatically
@@ -61,10 +66,21 @@ The tracker runs automatically:
     "world": "World Name",
     "experience": 12345678,
     "level": 123,
+    "vocation": "Elite Knight",
+    "rank": 42,
     "last_updated": "2025-11-15 12:00:00 UTC"
   }
 }
 ```
+
+**Fields:**
+- `name`: Character's display name
+- `world`: Game world/server the character belongs to
+- `experience`: Total experience points (from highscores API)
+- `level`: Current character level
+- `vocation`: Character's vocation (e.g., "Elite Knight", "Royal Paladin", etc.)
+- `rank`: Position in the world's experience highscores
+- `last_updated`: Timestamp of last data update (UTC)
 
 ## Manual Execution
 
@@ -101,8 +117,11 @@ The GitHub Actions workflow requires:
 
 This project uses the TibiaData API v4:
 - **Base URL**: `https://api.tibiadata.com/v4`
-- **Endpoint**: `/character/{name}`
+- **Character Endpoint**: `/character/{name}` - Used to get character's world
+- **Highscores Endpoint**: `/highscores/{world}/experience/all/{page}` - Used to get accurate experience data
 - **Documentation**: [TibiaData.com](https://tibiadata.com)
+
+The tracker first queries the character endpoint to determine which world the character belongs to, then searches through the highscores pages for that world to find the character's accurate experience value.
 
 ## License
 
