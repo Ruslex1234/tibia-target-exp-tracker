@@ -37,14 +37,12 @@ def fetch_player_list() -> List[str]:
         sys.exit(1)
 
 
-def get_character_data(character_name: str) -> Optional[Dict]:
-    """Fetch character data from TibiaData API."""
+def get_character_world(character_name: str) -> Optional[str]:
+    """Get the world a character belongs to from character API."""
     try:
-        # URL encode the character name
         encoded_name = requests.utils.quote(character_name)
         url = f"{TIBIADATA_API_BASE}/character/{encoded_name}"
 
-        # Add User-Agent header to avoid 403 errors
         headers = {
             'User-Agent': 'TibiaExpTracker/1.0 (GitHub Actions Bot)',
             'Accept': 'application/json'
@@ -54,19 +52,90 @@ def get_character_data(character_name: str) -> Optional[Dict]:
         response.raise_for_status()
         data = response.json()
 
-        # Check if character exists
-        if "character" not in data or "character" not in data["character"]:
-            print(f"✗ Character '{character_name}' not found")
+        if "character" in data and "character" in data["character"]:
+            world = data["character"]["character"].get("world")
+            if world:
+                print(f"  Found world: {world}")
+                return world
+
+        return None
+    except Exception as e:
+        print(f"  ⚠ Could not get world from character API: {e}")
+        return None
+
+
+def search_highscores_for_character(character_name: str, world: str) -> Optional[Dict]:
+    """Search highscores API to find character and get experience data."""
+    try:
+        headers = {
+            'User-Agent': 'TibiaExpTracker/1.0 (GitHub Actions Bot)',
+            'Accept': 'application/json'
+        }
+
+        # Start from page 1 and search through pages
+        page = 1
+        max_pages = 20  # TibiaData typically has ~20 pages in highscores
+
+        while page <= max_pages:
+            url = f"{TIBIADATA_API_BASE}/highscores/{world}/experience/all/{page}"
+
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+
+            if "highscores" not in data:
+                print(f"  ✗ Invalid highscores response")
+                return None
+
+            highscores = data["highscores"]
+            highscore_list = highscores.get("highscore_list", [])
+
+            # Search for character in current page
+            for entry in highscore_list:
+                if entry.get("name", "").lower() == character_name.lower():
+                    print(f"  ✓ Found in highscores (page {page}, rank {entry.get('rank')})")
+                    return {
+                        "name": entry.get("name", character_name),
+                        "world": entry.get("world", world),
+                        "experience": entry.get("value", 0),
+                        "level": entry.get("level", 0),
+                        "vocation": entry.get("vocation", "Unknown"),
+                        "rank": entry.get("rank", 0)
+                    }
+
+            # Check if we should continue to next page
+            page_info = highscores.get("highscore_page", {})
+            total_pages = page_info.get("total_pages", 0)
+
+            if page >= total_pages:
+                break
+
+            page += 1
+            time.sleep(0.3)  # Small delay between page requests
+
+        print(f"  ✗ Character not found in highscores (searched {page-1} pages)")
+        return None
+
+    except Exception as e:
+        print(f"  ✗ Error searching highscores: {e}")
+        return None
+
+
+def get_character_data(character_name: str) -> Optional[Dict]:
+    """Fetch character data from TibiaData API using highscores."""
+    try:
+        # Step 1: Get the character's world
+        world = get_character_world(character_name)
+
+        if not world:
+            print(f"  ✗ Could not determine world for '{character_name}'")
             return None
 
-        char_info = data["character"]["character"]
+        # Step 2: Search highscores for the character to get accurate experience
+        char_data = search_highscores_for_character(character_name, world)
 
-        return {
-            "name": char_info.get("name", character_name),
-            "world": char_info.get("world", "Unknown"),
-            "experience": char_info.get("experience", 0),
-            "level": char_info.get("level", 0)
-        }
+        return char_data
+
     except Exception as e:
         print(f"✗ Error fetching data for '{character_name}': {e}")
         return None
@@ -103,27 +172,42 @@ def send_discord_notification(character_name: str, char_data: Dict):
         return
 
     try:
+        fields = [
+            {
+                "name": "World",
+                "value": char_data.get("world", "Unknown"),
+                "inline": True
+            },
+            {
+                "name": "Level",
+                "value": str(char_data.get("level", "Unknown")),
+                "inline": True
+            },
+            {
+                "name": "Vocation",
+                "value": char_data.get("vocation", "Unknown"),
+                "inline": True
+            },
+            {
+                "name": "Experience",
+                "value": f"{char_data.get('experience', 0):,}",
+                "inline": False
+            }
+        ]
+
+        # Add rank if available
+        if "rank" in char_data and char_data["rank"] > 0:
+            fields.append({
+                "name": "Highscore Rank",
+                "value": f"#{char_data['rank']}",
+                "inline": True
+            })
+
         embed = {
             "title": "🆕 New Character Tracked",
             "description": f"Started tracking **{character_name}**",
             "color": 3447003,  # Blue color
-            "fields": [
-                {
-                    "name": "World",
-                    "value": char_data.get("world", "Unknown"),
-                    "inline": True
-                },
-                {
-                    "name": "Level",
-                    "value": str(char_data.get("level", "Unknown")),
-                    "inline": True
-                },
-                {
-                    "name": "Experience",
-                    "value": f"{char_data.get('experience', 0):,}",
-                    "inline": False
-                }
-            ],
+            "fields": fields,
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
         }
 
@@ -175,12 +259,16 @@ def main():
                 "world": char_data["world"],
                 "experience": char_data["experience"],
                 "level": char_data["level"],
+                "vocation": char_data.get("vocation", "Unknown"),
+                "rank": char_data.get("rank", 0),
                 "last_updated": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
             }
 
             print(f"  World: {char_data['world']}")
             print(f"  Level: {char_data['level']}")
+            print(f"  Vocation: {char_data.get('vocation', 'Unknown')}")
             print(f"  Experience: {char_data['experience']:,}")
+            print(f"  Rank: #{char_data.get('rank', 'N/A')}")
 
             if is_new:
                 print(f"  ⭐ New character detected!")
