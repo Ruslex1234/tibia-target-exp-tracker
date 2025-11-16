@@ -297,7 +297,7 @@ def main():
     print(f"✓ Loaded existing data for {len(exp_data)} characters")
 
     # Track each player
-    new_characters = []
+    new_characters = 0
     exp_changes = []
     updated_data = {}
 
@@ -330,8 +330,8 @@ def main():
             print(f"  Rank: #{char_data.get('rank', 'N/A')}")
 
             if is_new:
-                print(f"  ⭐ New character detected!")
-                new_characters.append((player_name, char_data))
+                print(f"  ⭐ New character detected (no notification sent)")
+                new_characters += 1
             else:
                 # Check if experience has changed
                 old_exp = old_data.get("experience", 0)
@@ -350,20 +350,9 @@ def main():
     # Save updated data
     save_exp_data(updated_data)
 
-    # Send Discord notifications
+    # Send Discord notifications for experience changes only
     notifications_sent = 0
 
-    # Notify for new characters
-    if new_characters:
-        print(f"\n{'=' * 60}")
-        print(f"Sending notifications for {len(new_characters)} new character(s)")
-        print("=" * 60)
-        for char_name, char_data in new_characters:
-            send_discord_notification(char_name, char_data, notification_type="new")
-            notifications_sent += 1
-            time.sleep(1)  # Delay between notifications
-
-    # Notify for experience changes
     if exp_changes:
         print(f"\n{'=' * 60}")
         print(f"Sending notifications for {len(exp_changes)} experience change(s)")
@@ -376,7 +365,7 @@ def main():
     print(f"\n{'=' * 60}")
     print(f"✓ Tracking complete!")
     print(f"  Total characters tracked: {len(updated_data)}")
-    print(f"  New characters: {len(new_characters)}")
+    print(f"  New characters added: {new_characters}")
     print(f"  Experience changes: {len(exp_changes)}")
     print(f"  Discord notifications sent: {notifications_sent}")
     print("=" * 60)
