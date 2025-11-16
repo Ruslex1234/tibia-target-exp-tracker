@@ -1,13 +1,12 @@
 # Tibia Target Experience Tracker
 
-An automated experience tracker for Tibia characters using the TibiaData API. This tool monitors player experience levels and sends Discord notifications when new characters are added to tracking.
+An automated experience tracker for Tibia characters using the TibiaData API. This tool monitors player experience levels and sends Discord notifications when experience changes are detected.
 
 ## Features
 
 - **Automatic Tracking**: Monitors multiple Tibia characters automatically
 - **TibiaData Integration**: Uses the official TibiaData API v4 for accurate data
-- **Discord Notifications**: Sends notifications for:
-  - New characters added to tracking
+- **Discord Notifications**: Sends notifications only when experience changes, showing:
   - Experience changes (gain/loss)
   - Level changes
   - Rank changes in highscores
@@ -32,9 +31,7 @@ An automated experience tracker for Tibia characters using the TibiaData API. Th
    - Experience changes (gains or losses)
    - Level changes
    - Rank changes
-4. **Discord Notifications**: Sends webhook notifications when:
-   - A new character is added to tracking (blue notification)
-   - Experience changes are detected (green notification with gain/loss details)
+4. **Discord Notifications**: Sends webhook notifications only when experience changes are detected (green notification with gain/loss details)
 5. **Stores Data**: Saves the updated data to `exp.json`
 6. **Auto-Commits**: Updates the `exp.json` file in the repository automatically
 
@@ -53,15 +50,16 @@ The Discord webhook URL must be configured as a repository secret:
 - **Secret Name**: `WEBHOOK`
 - **Location**: Repository Settings → Secrets and variables → Actions
 
-#### Notification Types
+#### Notification Behavior
 
-**New Character Tracked** (Blue)
-- Sent when a character is added to tracking for the first time
-- Shows: World, Level, Vocation, Experience, Rank
-
-**Experience Gained** (Green)
-- Sent when experience changes are detected
-- Shows: Experience change (old → new), Level changes (if applicable), Rank changes (if applicable)
+**Experience Change Notifications** (Green)
+- Sent **only** when experience changes are detected
+- Shows:
+  - World, Level, Vocation
+  - Experience change (old → new with gain/loss amount)
+  - Level changes (if applicable)
+  - Rank changes with ↑/↓ indicators (if applicable)
+- **Not sent** for new characters being added to tracking
 - Only triggers when experience value actually changes between checks
 
 ## Files
