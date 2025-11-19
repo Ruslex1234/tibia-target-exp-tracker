@@ -1,4 +1,13 @@
 {
+  "Julio Warrior": {
+    "name": "Julio Warrior",
+    "world": "Firmera",
+    "experience": 12569773475,
+    "level": 912,
+    "vocation": "Elite Knight",
+    "rank": 41,
+    "last_updated": "2025-11-19 21:01:56 UTC"
+  },
   "Udyr Tanker": {
     "name": "Udyr Tanker",
     "world": "Firmera",
@@ -6,7 +15,7 @@
     "level": 500,
     "vocation": "Elite Knight",
     "rank": 353,
-    "last_updated": "2025-11-19 20:34:34 UTC"
+    "last_updated": "2025-11-19 21:03:08 UTC"
   },
   "Psycho Barbie": {
     "name": "Psycho Barbie",
@@ -15,6 +24,6 @@
     "level": 383,
     "vocation": "Elder Druid",
     "rank": 688,
-    "last_updated": "2025-11-19 20:35:22 UTC"
+    "last_updated": "2025-11-19 21:03:30 UTC"
   }
 }
