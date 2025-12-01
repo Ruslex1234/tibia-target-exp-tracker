@@ -6,7 +6,7 @@
     "level": 912,
     "vocation": "Elite Knight",
     "rank": 44,
-    "last_updated": "2025-12-01 22:01:50 UTC"
+    "last_updated": "2025-12-01 22:35:19 UTC"
   },
   "Julio Blocker": {
     "name": "Julio Blocker",
@@ -15,6 +15,15 @@
     "level": 380,
     "vocation": "Elite Knight",
     "rank": 696,
-    "last_updated": "2025-12-01 22:02:51 UTC"
+    "last_updated": "2025-12-01 22:35:59 UTC"
+  },
+  "Udyr Tanker": {
+    "name": "Udyr Tanker",
+    "world": "Firmera",
+    "experience": 2066139425,
+    "level": 500,
+    "vocation": "Elite Knight",
+    "rank": 356,
+    "last_updated": "2025-12-01 22:36:50 UTC"
   }
 }
