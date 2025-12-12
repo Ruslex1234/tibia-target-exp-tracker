@@ -6,7 +6,7 @@
     "level": 912,
     "vocation": "Elite Knight",
     "rank": 44,
-    "last_updated": "2025-12-12 21:01:36 UTC"
+    "last_updated": "2025-12-12 21:33:26 UTC"
   },
   "Julio Blocker": {
     "name": "Julio Blocker",
@@ -15,51 +15,6 @@
     "level": 382,
     "vocation": "Elite Knight",
     "rank": 690,
-    "last_updated": "2025-12-12 21:01:58 UTC"
-  },
-  "Udyr Tanker": {
-    "name": "Udyr Tanker",
-    "world": "Firmera",
-    "experience": 2074439247,
-    "level": 501,
-    "vocation": "Elite Knight",
-    "rank": 356,
-    "last_updated": "2025-12-12 21:02:45 UTC"
-  },
-  "Psycho Barbie": {
-    "name": "Psycho Barbie",
-    "world": "Firmera",
-    "experience": 930611794,
-    "level": 384,
-    "vocation": "Elder Druid",
-    "rank": 680,
-    "last_updated": "2025-12-12 21:03:11 UTC"
-  },
-  "Kuroashii": {
-    "name": "Kuroashii",
-    "world": "Firmera",
-    "experience": 3106593391,
-    "level": 573,
-    "vocation": "Knight",
-    "rank": 231,
-    "last_updated": "2025-12-12 21:03:25 UTC"
-  },
-  "Julio Warrior ba": {
-    "name": "Julio Warrior ba",
-    "world": "Firmera",
-    "experience": 3039478788,
-    "level": 569,
-    "vocation": "Elite Knight",
-    "rank": 237,
-    "last_updated": "2025-12-12 21:03:37 UTC"
-  },
-  "Julio Warrior baa": {
-    "name": "Julio Warrior baa",
-    "world": "Firmera",
-    "experience": 2136173212,
-    "level": 506,
-    "vocation": "Elite Knight",
-    "rank": 347,
-    "last_updated": "2025-12-12 21:03:53 UTC"
+    "last_updated": "2025-12-12 21:34:15 UTC"
   }
 }
