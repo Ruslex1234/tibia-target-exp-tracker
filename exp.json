@@ -6,15 +6,24 @@
     "level": 921,
     "vocation": "Elite Knight",
     "rank": 332,
-    "last_updated": "2025-12-26 17:34:49 UTC"
+    "last_updated": "2025-12-26 18:03:40 UTC"
   },
-  "Julio Blocker": {
-    "name": "Julio Blocker",
+  "Kuroashii": {
+    "name": "Kuroashii",
     "world": "Firmera",
-    "experience": 914890882,
-    "level": 382,
+    "experience": 3106593391,
+    "level": 573,
+    "vocation": "Knight",
+    "rank": 229,
+    "last_updated": "2025-12-26 18:05:26 UTC"
+  },
+  "Julio Warrior ba": {
+    "name": "Julio Warrior ba",
+    "world": "Firmera",
+    "experience": 3039478788,
+    "level": 569,
     "vocation": "Elite Knight",
-    "rank": 690,
-    "last_updated": "2025-12-26 17:36:53 UTC"
+    "rank": 236,
+    "last_updated": "2025-12-26 18:06:27 UTC"
   }
 }
