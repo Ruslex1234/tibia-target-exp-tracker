@@ -1,13 +1,4 @@
 {
-  "Julio Warrior": {
-    "name": "Julio Warrior",
-    "world": "Quelibra",
-    "experience": 12947393264,
-    "level": 921,
-    "vocation": "Elite Knight",
-    "rank": 331,
-    "last_updated": "2025-12-26 15:35:25 UTC"
-  },
   "Julio Blocker": {
     "name": "Julio Blocker",
     "world": "Firmera",
@@ -15,6 +6,6 @@
     "level": 382,
     "vocation": "Elite Knight",
     "rank": 690,
-    "last_updated": "2025-12-26 15:36:09 UTC"
+    "last_updated": "2025-12-26 16:03:35 UTC"
   }
 }
