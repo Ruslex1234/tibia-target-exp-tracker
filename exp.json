@@ -1,11 +1,29 @@
 {
-  "Julio Warrior": {
-    "name": "Julio Warrior",
-    "world": "Quelibra",
-    "experience": 12947393264,
-    "level": 921,
+  "Kuroashii": {
+    "name": "Kuroashii",
+    "world": "Firmera",
+    "experience": 3106593391,
+    "level": 573,
+    "vocation": "Knight",
+    "rank": 228,
+    "last_updated": "2025-12-27 19:01:44 UTC"
+  },
+  "Julio Warrior ba": {
+    "name": "Julio Warrior ba",
+    "world": "Firmera",
+    "experience": 3039478788,
+    "level": 569,
     "vocation": "Elite Knight",
-    "rank": 331,
-    "last_updated": "2025-12-27 18:40:42 UTC"
+    "rank": 235,
+    "last_updated": "2025-12-27 19:02:04 UTC"
+  },
+  "Julio Warrior baa": {
+    "name": "Julio Warrior baa",
+    "world": "Firmera",
+    "experience": 2136173212,
+    "level": 506,
+    "vocation": "Elite Knight",
+    "rank": 345,
+    "last_updated": "2025-12-27 19:02:33 UTC"
   }
 }
