@@ -1,1 +1,29 @@
-{}
+{
+  "Julio Warrior": {
+    "name": "Julio Warrior",
+    "world": "Quelibra",
+    "experience": 12947393264,
+    "level": 921,
+    "vocation": "Elite Knight",
+    "rank": 333,
+    "last_updated": "2025-12-28 18:01:57 UTC"
+  },
+  "Julio Blocker": {
+    "name": "Julio Blocker",
+    "world": "Firmera",
+    "experience": 914890882,
+    "level": 382,
+    "vocation": "Elite Knight",
+    "rank": 691,
+    "last_updated": "2025-12-28 18:02:23 UTC"
+  },
+  "Udyr Tanker": {
+    "name": "Udyr Tanker",
+    "world": "Firmera",
+    "experience": 2080131291,
+    "level": 501,
+    "vocation": "Elite Knight",
+    "rank": 355,
+    "last_updated": "2025-12-28 18:03:29 UTC"
+  }
+}
