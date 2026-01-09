@@ -1,29 +1,29 @@
 {
-  "Kuroashii": {
-    "name": "Kuroashii",
-    "world": "Firmera",
-    "experience": 3106593391,
-    "level": 573,
-    "vocation": "Knight",
-    "rank": 230,
-    "last_updated": "2026-01-09 22:02:14 UTC"
-  },
-  "Julio Warrior ba": {
-    "name": "Julio Warrior ba",
-    "world": "Firmera",
-    "experience": 3039478788,
-    "level": 569,
+  "Julio Warrior": {
+    "name": "Julio Warrior",
+    "world": "Quelibra",
+    "experience": 13258941442,
+    "level": 928,
     "vocation": "Elite Knight",
-    "rank": 240,
-    "last_updated": "2026-01-09 22:02:22 UTC"
+    "rank": 325,
+    "last_updated": "2026-01-09 22:36:50 UTC"
   },
-  "Julio Warrior baa": {
-    "name": "Julio Warrior baa",
+  "Julio Blocker": {
+    "name": "Julio Blocker",
     "world": "Firmera",
-    "experience": 2136173212,
-    "level": 506,
+    "experience": 914890882,
+    "level": 382,
     "vocation": "Elite Knight",
-    "rank": 347,
-    "last_updated": "2026-01-09 22:02:36 UTC"
+    "rank": 689,
+    "last_updated": "2026-01-09 22:37:20 UTC"
+  },
+  "Udyr Tanker": {
+    "name": "Udyr Tanker",
+    "world": "Firmera",
+    "experience": 2093212096,
+    "level": 502,
+    "vocation": "Elite Knight",
+    "rank": 355,
+    "last_updated": "2026-01-09 22:38:14 UTC"
   }
 }
