@@ -1,20 +1,11 @@
 {
-  "Julio Warrior": {
-    "name": "Julio Warrior",
-    "world": "Quelibra",
-    "experience": 13329395203,
-    "level": 930,
-    "vocation": "Elite Knight",
-    "rank": 323,
-    "last_updated": "2026-01-21 00:46:54 UTC"
-  },
-  "Julio Blocker": {
-    "name": "Julio Blocker",
+  "Kuroashii": {
+    "name": "Kuroashii",
     "world": "Firmera",
-    "experience": 914890882,
-    "level": 382,
-    "vocation": "Elite Knight",
-    "rank": 674,
-    "last_updated": "2026-01-21 00:47:32 UTC"
+    "experience": 3106593391,
+    "level": 573,
+    "vocation": "Knight",
+    "rank": 225,
+    "last_updated": "2026-01-21 01:30:23 UTC"
   }
 }
