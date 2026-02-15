@@ -2,11 +2,11 @@
   "Julio Warrior": {
     "name": "Julio Warrior",
     "world": "Quelibra",
-    "experience": 13654400977,
-    "level": 937,
+    "experience": 13668803138,
+    "level": 938,
     "vocation": "Elite Knight",
     "rank": 324,
-    "last_updated": "2026-02-15 11:36:21 UTC"
+    "last_updated": "2026-02-15 12:02:54 UTC"
   },
   "Julio Blocker": {
     "name": "Julio Blocker",
@@ -15,7 +15,7 @@
     "level": 382,
     "vocation": "Elite Knight",
     "rank": 652,
-    "last_updated": "2026-02-15 11:36:32 UTC"
+    "last_updated": "2026-02-15 12:03:06 UTC"
   },
   "Udyr Tanker": {
     "name": "Udyr Tanker",
@@ -24,7 +24,7 @@
     "level": 502,
     "vocation": "Knight",
     "rank": 333,
-    "last_updated": "2026-02-15 11:36:48 UTC"
+    "last_updated": "2026-02-15 12:03:23 UTC"
   },
   "Psycho Barbie": {
     "name": "Psycho Barbie",
@@ -33,7 +33,7 @@
     "level": 379,
     "vocation": "Elder Druid",
     "rank": 660,
-    "last_updated": "2026-02-15 11:36:55 UTC"
+    "last_updated": "2026-02-15 12:03:34 UTC"
   },
   "Kuroashii": {
     "name": "Kuroashii",
@@ -42,6 +42,6 @@
     "level": 573,
     "vocation": "Knight",
     "rank": 219,
-    "last_updated": "2026-02-15 11:36:58 UTC"
+    "last_updated": "2026-02-15 12:03:37 UTC"
   }
 }
