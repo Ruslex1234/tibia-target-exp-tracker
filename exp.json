@@ -6,7 +6,7 @@
     "level": 960,
     "vocation": "Elite Knight",
     "rank": 290,
-    "last_updated": "2026-07-05 22:48:18 UTC"
+    "last_updated": "2026-07-05 23:54:44 UTC"
   },
   "Julio Blocker": {
     "name": "Julio Blocker",
@@ -15,6 +15,15 @@
     "level": 382,
     "vocation": "Elite Knight",
     "rank": 669,
-    "last_updated": "2026-07-05 22:48:52 UTC"
+    "last_updated": "2026-07-05 23:55:15 UTC"
+  },
+  "Psycho Barbie": {
+    "name": "Psycho Barbie",
+    "world": "Firmera",
+    "experience": 982897155,
+    "level": 391,
+    "vocation": "Elder Druid",
+    "rank": 630,
+    "last_updated": "2026-07-05 23:56:15 UTC"
   }
 }
