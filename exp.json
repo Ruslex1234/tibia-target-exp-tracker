@@ -2,10 +2,37 @@
   "Julio Warrior": {
     "name": "Julio Warrior",
     "world": "Quelibra",
-    "experience": 14716025839,
+    "experience": 14725106641,
     "level": 961,
     "vocation": "Elite Knight",
     "rank": 301,
-    "last_updated": "2026-07-26 18:53:12 UTC"
+    "last_updated": "2026-07-26 20:03:05 UTC"
+  },
+  "Julio Blocker": {
+    "name": "Julio Blocker",
+    "world": "Firmera",
+    "experience": 914890882,
+    "level": 382,
+    "vocation": "Elite Knight",
+    "rank": 674,
+    "last_updated": "2026-07-26 20:03:41 UTC"
+  },
+  "Psycho Barbie": {
+    "name": "Psycho Barbie",
+    "world": "Firmera",
+    "experience": 1027588699,
+    "level": 397,
+    "vocation": "Elder Druid",
+    "rank": 624,
+    "last_updated": "2026-07-26 20:04:30 UTC"
+  },
+  "Kuroashii": {
+    "name": "Kuroashii",
+    "world": "Firmera",
+    "experience": 3106593391,
+    "level": 573,
+    "vocation": "Knight",
+    "rank": 226,
+    "last_updated": "2026-07-26 20:04:38 UTC"
   }
 }
