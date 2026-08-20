@@ -6,7 +6,7 @@
     "level": 962,
     "vocation": "Elite Knight",
     "rank": 309,
-    "last_updated": "2026-08-20 17:22:19 UTC"
+    "last_updated": "2026-08-20 17:52:36 UTC"
   },
   "Julio Blocker": {
     "name": "Julio Blocker",
@@ -15,6 +15,15 @@
     "level": 382,
     "vocation": "Elite Knight",
     "rank": 696,
-    "last_updated": "2026-08-20 17:22:53 UTC"
+    "last_updated": "2026-08-20 17:53:17 UTC"
+  },
+  "Kuroashii": {
+    "name": "Kuroashii",
+    "world": "Firmera",
+    "experience": 3106593391,
+    "level": 573,
+    "vocation": "Knight",
+    "rank": 246,
+    "last_updated": "2026-08-20 17:54:07 UTC"
   }
 }
