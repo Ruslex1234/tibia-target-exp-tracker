@@ -6,7 +6,7 @@
     "level": 962,
     "vocation": "Elite Knight",
     "rank": 310,
-    "last_updated": "2026-08-21 17:52:10 UTC"
+    "last_updated": "2026-08-21 18:19:35 UTC"
   },
   "Julio Blocker": {
     "name": "Julio Blocker",
@@ -15,24 +15,6 @@
     "level": 382,
     "vocation": "Elite Knight",
     "rank": 696,
-    "last_updated": "2026-08-21 17:53:01 UTC"
-  },
-  "Psycho Barbie": {
-    "name": "Psycho Barbie",
-    "world": "Firmera",
-    "experience": 1055359410,
-    "level": 400,
-    "vocation": "Elder Druid",
-    "rank": 628,
-    "last_updated": "2026-08-21 17:54:03 UTC"
-  },
-  "Kuroashii": {
-    "name": "Kuroashii",
-    "world": "Firmera",
-    "experience": 3106593391,
-    "level": 573,
-    "vocation": "Knight",
-    "rank": 246,
-    "last_updated": "2026-08-21 17:54:11 UTC"
+    "last_updated": "2026-08-21 18:20:11 UTC"
   }
 }
