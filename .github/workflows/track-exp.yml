@@ -2,8 +2,11 @@ name: Track Tibia Experience
 
 on:
   schedule:
-    # Run every 30 minutes
-    - cron: '*/30 * * * *'
+    # Twice an hour, at odd off-peak minutes.
+    # GitHub drops scheduled runs queued on busy minutes (:00, :15, :30, :45),
+    # so these are deliberately offset to unpopular odd-numbered minutes.
+    - cron: '7 * * * *'
+    - cron: '37 * * * *'
   workflow_dispatch: # Allow manual triggering
 
 permissions:
