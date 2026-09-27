@@ -6,7 +6,7 @@
     "level": 968,
     "vocation": "Elite Knight",
     "rank": 311,
-    "last_updated": "2026-09-27 15:41:55 UTC"
+    "last_updated": "2026-09-27 19:22:29 UTC"
   },
   "Julio Blocker": {
     "name": "Julio Blocker",
@@ -15,7 +15,7 @@
     "level": 382,
     "vocation": "Elite Knight",
     "rank": 692,
-    "last_updated": "2026-09-27 15:42:05 UTC"
+    "last_updated": "2026-09-27 19:22:38 UTC"
   },
   "Psycho Barbie": {
     "name": "Psycho Barbie",
@@ -24,7 +24,7 @@
     "level": 403,
     "vocation": "Elder Druid",
     "rank": 611,
-    "last_updated": "2026-09-27 15:42:22 UTC"
+    "last_updated": "2026-09-27 19:22:50 UTC"
   },
   "Kuroashii": {
     "name": "Kuroashii",
@@ -33,24 +33,24 @@
     "level": 573,
     "vocation": "Knight",
     "rank": 254,
-    "last_updated": "2026-09-27 15:42:27 UTC"
+    "last_updated": "2026-09-27 19:22:54 UTC"
   },
   "Ohellnaw": {
     "name": "Ohellnaw",
     "world": "Firmera",
-    "experience": 14838037581,
+    "experience": 14860929075,
     "level": 964,
     "vocation": "Royal Paladin",
     "rank": 40,
-    "last_updated": "2026-09-27 15:42:27 UTC"
+    "last_updated": "2026-09-27 19:22:54 UTC"
   },
   "Tibex Archer": {
     "name": "Tibex Archer",
     "world": "Firmera",
-    "experience": 4551602479,
-    "level": 650,
+    "experience": 4559376173,
+    "level": 651,
     "vocation": "Royal Paladin",
     "rank": 175,
-    "last_updated": "2026-09-27 15:42:29 UTC"
+    "last_updated": "2026-09-27 19:22:56 UTC"
   }
 }
