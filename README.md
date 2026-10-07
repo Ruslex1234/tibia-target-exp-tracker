@@ -66,7 +66,6 @@ The Discord webhook URL must be configured as a repository secret:
 
 - **`track_exp.py`**: Main Python script that handles tracking
 - **`exp.json`**: JSON file storing current experience data for all tracked characters
-- **`requirements.txt`**: Python dependencies
 - **`.github/workflows/track-exp.yml`**: GitHub Actions workflow configuration
 
 ## Workflow Schedule
@@ -107,14 +106,13 @@ The tracker runs automatically:
 To run the tracker manually locally:
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+# No dependencies to install: only the Python 3 standard library is used
 
 # Set Discord webhook (optional)
 export WEBHOOK="your_discord_webhook_url"
 
 # Run the tracker
-python track_exp.py
+python3 track_exp.py
 ```
 
 **Note**: The TibiaData API may block requests from certain IP addresses or environments due to anti-bot protection. If you encounter 403 errors when running locally, this is expected. The script will work correctly when running via GitHub Actions.
@@ -123,10 +121,10 @@ python track_exp.py
 
 The workflow is automatically configured and will:
 1. Check out the repository
-2. Set up Python 3.11
-3. Install dependencies
-4. Run the tracker script
-5. Commit and push any changes to `exp.json`
+2. Run the tracker script with the runner's preinstalled `python3` (no setup or install steps)
+3. Commit and push any changes to `exp.json`
+
+Runs never overlap: a `concurrency` group queues a new run until the previous one finishes.
 
 ## Permissions
 
