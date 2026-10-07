@@ -9,31 +9,29 @@ on:
 permissions:
   contents: write
 
+# Never let two runs overlap and race each other on the exp.json push
+concurrency:
+  group: track-exp
+  cancel-in-progress: false
+
 jobs:
   track-exp:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-
+      # No setup or install steps: the script uses only the Python standard
+      # library, and ubuntu-latest already ships python3.
       - name: Run experience tracker
         env:
           WEBHOOK: ${{ secrets.WEBHOOK }}
         run: |
-          python track_exp.py
+          python3 track_exp.py
 
       - name: Commit and push exp.json updates
         run: |
@@ -46,5 +44,6 @@ jobs:
           else
             git add exp.json
             git commit -m "Update experience data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
             git push
           fi

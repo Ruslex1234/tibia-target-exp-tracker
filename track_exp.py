@@ -8,7 +8,8 @@ import json
 import os
 import sys
 import time
-import requests
+import urllib.parse
+import urllib.request
 from typing import Dict, List, Optional
 from pathlib import Path
 
@@ -18,18 +19,32 @@ ALERTS_URL = "https://raw.githubusercontent.com/Ruslex1234/tibia-ops-config/refs
 TIBIADATA_API_BASE = "https://api.tibiadata.com/v4"
 EXP_JSON_PATH = "exp.json"
 DISCORD_WEBHOOK_URL = os.environ.get("WEBHOOK", "")
+HEADERS = {
+    'User-Agent': 'TibiaExpTracker/1.0 (GitHub Actions Bot)',
+    'Accept': 'application/json'
+}
+
+
+def http_json(url: str, payload: Optional[Dict] = None, timeout: int = 10):
+    """GET (or POST when payload is given) using only the standard library.
+
+    Raises urllib.error.HTTPError on non-2xx responses, like raise_for_status().
+    """
+    headers = dict(HEADERS)
+    data = None
+    if payload is not None:
+        data = json.dumps(payload).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+    req = urllib.request.Request(url, data=data, headers=headers)
+    with urllib.request.urlopen(req, timeout=timeout) as response:
+        body = response.read()
+    return json.loads(body) if body else None
 
 
 def fetch_player_list() -> List[str]:
     """Fetch the list of players to track from the alerts.json file."""
     try:
-        headers = {
-            'User-Agent': 'TibiaExpTracker/1.0 (GitHub Actions Bot)',
-            'Accept': 'application/json'
-        }
-        response = requests.get(ALERTS_URL, headers=headers, timeout=10)
-        response.raise_for_status()
-        players = response.json()
+        players = http_json(ALERTS_URL)
         print(f"✓ Fetched {len(players)} players to track")
         return players
     except Exception as e:
@@ -40,17 +55,11 @@ def fetch_player_list() -> List[str]:
 def get_character_world(character_name: str) -> Optional[str]:
     """Get the world a character belongs to from character API."""
     try:
-        encoded_name = requests.utils.quote(character_name)
+        encoded_name = urllib.parse.quote(character_name)
         url = f"{TIBIADATA_API_BASE}/character/{encoded_name}"
 
-        headers = {
-            'User-Agent': 'TibiaExpTracker/1.0 (GitHub Actions Bot)',
-            'Accept': 'application/json'
-        }
 
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-        data = response.json()
+        data = http_json(url)
 
         if "character" in data and "character" in data["character"]:
             world = data["character"]["character"].get("world")
@@ -67,10 +76,6 @@ def get_character_world(character_name: str) -> Optional[str]:
 def search_highscores_for_character(character_name: str, world: str) -> Optional[Dict]:
     """Search highscores API to find character and get experience data."""
     try:
-        headers = {
-            'User-Agent': 'TibiaExpTracker/1.0 (GitHub Actions Bot)',
-            'Accept': 'application/json'
-        }
 
         # Start from page 1 and search through pages
         page = 1
@@ -79,9 +84,7 @@ def search_highscores_for_character(character_name: str, world: str) -> Optional
         while page <= max_pages:
             url = f"{TIBIADATA_API_BASE}/highscores/{world}/experience/all/{page}"
 
-            response = requests.get(url, headers=headers, timeout=10)
-            response.raise_for_status()
-            data = response.json()
+            data = http_json(url)
 
             if "highscores" not in data:
                 print(f"  ✗ Invalid highscores response")
@@ -272,12 +275,7 @@ def send_discord_notification(character_name: str, char_data: Dict, notification
             "embeds": [embed]
         }
 
-        response = requests.post(
-            DISCORD_WEBHOOK_URL,
-            json=payload,
-            timeout=10
-        )
-        response.raise_for_status()
+        http_json(DISCORD_WEBHOOK_URL, payload=payload)
         print(f"✓ Sent Discord notification for '{character_name}' ({notification_type})")
     except Exception as e:
         print(f"✗ Error sending Discord notification: {e}")
