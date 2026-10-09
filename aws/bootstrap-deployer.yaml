@@ -1,0 +1,159 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  One time setup, deployed by the account owner. Creates a least privilege
+  role that can only manage tibia-* resources, for short lived (30 minute)
+  deploy sessions. Roles it creates must carry the tibia-boundary
+  permissions boundary, so it cannot escalate its own privileges.
+
+Parameters:
+  MaxSessionSeconds:
+    Type: Number
+    Default: 3600
+    MinValue: 3600
+    MaxValue: 43200
+    Description: Upper limit for sessions. Request 1800s in assume-role.
+
+Resources:
+  # Ceiling for every role the deployer creates. Even if a role policy asks
+  # for more, the effective permissions never exceed this.
+  TibiaBoundary:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: tibia-boundary
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: Logs
+            Effect: Allow
+            Action: [logs:CreateLogStream, logs:PutLogEvents]
+            Resource: !Sub arn:${AWS::Partition}:logs:*:${AWS::AccountId}:log-group:/aws/lambda/tibia-*:*
+          - Sid: TibiaParams
+            Effect: Allow
+            Action: [ssm:GetParameter, ssm:PutParameter]
+            Resource: !Sub arn:${AWS::Partition}:ssm:*:${AWS::AccountId}:parameter/tibia/*
+          - Sid: InvokeTibiaFunctions
+            Effect: Allow
+            Action: lambda:InvokeFunction
+            Resource: !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function:tibia-*
+
+  DeployerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: claude-deployer
+      MaxSessionDuration: !Ref MaxSessionSeconds
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: tibia-deployer
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: Stacks
+                Effect: Allow
+                Action:
+                  - cloudformation:CreateStack
+                  - cloudformation:UpdateStack
+                  - cloudformation:DeleteStack
+                  - cloudformation:DescribeStacks
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:DescribeStackResource
+                  - cloudformation:DescribeStackResources
+                  - cloudformation:GetTemplate
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:ExecuteChangeSet
+                  - cloudformation:DeleteChangeSet
+                  - cloudformation:ListChangeSets
+                Resource: !Sub arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stack/tibia-*/*
+              - Sid: StackReadOnly
+                Effect: Allow
+                Action: [cloudformation:ValidateTemplate, cloudformation:ListStacks, sts:GetCallerIdentity]
+                Resource: "*"
+              - Sid: CreateRolesOnlyWithBoundary
+                Effect: Allow
+                Action: [iam:CreateRole, iam:PutRolePolicy, iam:DeleteRolePolicy]
+                Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/tibia-*
+                Condition:
+                  StringEquals:
+                    iam:PermissionsBoundary: !Ref TibiaBoundary
+              - Sid: ManageTibiaRoles
+                Effect: Allow
+                Action:
+                  - iam:GetRole
+                  - iam:GetRolePolicy
+                  - iam:ListRolePolicies
+                  - iam:ListAttachedRolePolicies
+                  - iam:DeleteRole
+                  - iam:TagRole
+                  - iam:UntagRole
+                  - iam:UpdateAssumeRolePolicy
+                Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/tibia-*
+              - Sid: PassTibiaRolesToLambdaAndScheduler
+                Effect: Allow
+                Action: iam:PassRole
+                Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/tibia-*
+                Condition:
+                  StringEquals:
+                    iam:PassedToService: [lambda.amazonaws.com, scheduler.amazonaws.com]
+              - Sid: NeverRemoveBoundary
+                Effect: Deny
+                Action: [iam:DeleteRolePermissionsBoundary, iam:PutRolePermissionsBoundary, iam:AttachRolePolicy]
+                Resource: "*"
+              - Sid: TibiaFunctions
+                Effect: Allow
+                Action: lambda:*
+                Resource: !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function:tibia-*
+              - Sid: TibiaSchedules
+                Effect: Allow
+                Action: scheduler:*
+                Resource: !Sub arn:${AWS::Partition}:scheduler:*:${AWS::AccountId}:schedule/default/tibia-*
+              - Sid: TibiaStateParams
+                Effect: Allow
+                Action:
+                  - ssm:PutParameter
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:DeleteParameter
+                  - ssm:AddTagsToResource
+                  - ssm:RemoveTagsFromResource
+                  - ssm:ListTagsForResource
+                Resource: !Sub arn:${AWS::Partition}:ssm:*:${AWS::AccountId}:parameter/tibia/*
+              - Sid: DescribeParams
+                Effect: Allow
+                Action: ssm:DescribeParameters
+                Resource: "*"
+              # The deployer can see that the token exists but never read or change it.
+              - Sid: NeverTouchGithubToken
+                Effect: Deny
+                Action: [ssm:GetParameter, ssm:GetParameters, ssm:GetParameterHistory, ssm:PutParameter, ssm:DeleteParameter]
+                Resource: !Sub arn:${AWS::Partition}:ssm:*:${AWS::AccountId}:parameter/tibia/github-token
+              - Sid: TibiaLogs
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:DeleteLogGroup
+                  - logs:PutRetentionPolicy
+                  - logs:DeleteRetentionPolicy
+                  - logs:TagResource
+                  - logs:UntagResource
+                  - logs:ListTagsForResource
+                  - logs:FilterLogEvents
+                  - logs:GetLogEvents
+                Resource:
+                  - !Sub arn:${AWS::Partition}:logs:*:${AWS::AccountId}:log-group:/aws/lambda/tibia-*
+                  - !Sub arn:${AWS::Partition}:logs:*:${AWS::AccountId}:log-group:/aws/lambda/tibia-*:*
+              - Sid: DescribeLogs
+                Effect: Allow
+                Action: logs:DescribeLogGroups
+                Resource: "*"
+
+Outputs:
+  DeployerRoleArn:
+    Value: !GetAtt DeployerRole.Arn
+  BoundaryPolicyArn:
+    Value: !Ref TibiaBoundary

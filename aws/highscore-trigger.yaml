@@ -1,0 +1,187 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Polls the TibiaData highscores age on a schedule and dispatches the
+  track-exp GitHub Actions workflow as soon as the highscores refresh
+  (the age drops below the previous reading).
+
+Parameters:
+  World:
+    Type: String
+    Default: Firmera
+  Repo:
+    Type: String
+    Default: ruslex1234/tibia-target-exp-tracker
+  Workflow:
+    Type: String
+    Default: track-exp.yml
+  Ref:
+    Type: String
+    Default: main
+  ScheduleExpression:
+    Type: String
+    # Four checks an hour on odd minutes, away from the :00 traffic spike.
+    Default: cron(7,22,37,52 * * * ? *)
+  TokenParam:
+    Type: String
+    Default: /tibia/github-token
+    Description: SecureString holding a fine grained PAT (Actions read/write on Repo only). Created by the owner, never by this stack.
+  BoundaryPolicyArn:
+    Type: String
+    Description: The tibia-boundary policy ARN from the bootstrap stack.
+
+Resources:
+  # Last highscore age seen. -1 means "nothing seen yet": the first run only records.
+  StateParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /tibia/last-highscore-age
+      Type: String
+      Value: "-1"
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/tibia-highscore-trigger
+      RetentionInDays: 7
+
+  FunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub tibia-highscore-trigger-fn-${AWS::Region}
+      PermissionsBoundary: !Ref BoundaryPolicyArn
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: tibia-highscore-trigger
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !Sub ${LogGroup.Arn}
+              - Effect: Allow
+                Action: [ssm:GetParameter, ssm:PutParameter]
+                Resource: !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/tibia/last-highscore-age
+              # Decryption uses the AWS managed aws/ssm key, which needs no extra KMS grant.
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource: !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${TokenParam}
+
+  Function:
+    Type: AWS::Lambda::Function
+    DependsOn: LogGroup
+    Properties:
+      FunctionName: tibia-highscore-trigger
+      Runtime: python3.13
+      Architectures: [arm64]
+      Handler: index.handler
+      MemorySize: 128
+      Timeout: 20
+      Role: !GetAtt FunctionRole.Arn
+      Environment:
+        Variables:
+          WORLD: !Ref World
+          REPO: !Ref Repo
+          WORKFLOW: !Ref Workflow
+          REF: !Ref Ref
+          STATE_PARAM: !Ref StateParam
+          TOKEN_PARAM: !Ref TokenParam
+      Code:
+        ZipFile: |
+          import json, os, urllib.parse, urllib.request
+          import boto3
+
+          ssm = boto3.client("ssm")
+          ENV = os.environ
+          HS_URL = ("https://api.tibiadata.com/v4/highscores/%s/experience/all/1"
+                    % urllib.parse.quote(ENV["WORLD"]))
+          DISPATCH_URL = ("https://api.github.com/repos/%s/actions/workflows/%s/dispatches"
+                          % (ENV["REPO"], ENV["WORKFLOW"]))
+
+
+          def http(url, data=None, headers=None):
+              req = urllib.request.Request(
+                  url, data=data, method="POST" if data else "GET",
+                  headers={"User-Agent": "tibia-highscore-trigger", **(headers or {})})
+              with urllib.request.urlopen(req, timeout=10) as r:
+                  return r.status, r.read()
+
+
+          def handler(event, context):
+              highscores = json.loads(http(HS_URL)[1])["highscores"]
+              if "highscore_age" not in highscores:
+                  raise KeyError("highscore_age missing, keys: %s" % sorted(highscores))
+              age = int(highscores["highscore_age"])
+              last = int(ssm.get_parameter(Name=ENV["STATE_PARAM"])["Parameter"]["Value"])
+              refreshed = last >= 0 and age < last
+
+              if refreshed:
+                  token = ssm.get_parameter(Name=ENV["TOKEN_PARAM"], WithDecryption=True)["Parameter"]["Value"]
+                  status, _ = http(DISPATCH_URL, json.dumps({"ref": ENV["REF"]}).encode(), {
+                      "Authorization": "Bearer " + token,
+                      "Accept": "application/vnd.github+json",
+                      "X-GitHub-Api-Version": "2022-11-28",
+                  })
+                  print("dispatched workflow, status %s" % status)
+
+              # Saved only after a successful dispatch, so a failed dispatch
+              # is retried on the next run (the age is still below `last`).
+              ssm.put_parameter(Name=ENV["STATE_PARAM"], Value=str(age), Overwrite=True)
+              result = {"age": age, "last": last, "refreshed": refreshed}
+              print(json.dumps(result))
+              return result
+
+  # No automatic retries: the next scheduled run is the retry.
+  FunctionInvokeConfig:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties:
+      FunctionName: !Ref Function
+      Qualifier: $LATEST
+      MaximumRetryAttempts: 0
+
+  SchedulerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub tibia-highscore-trigger-sched-${AWS::Region}
+      PermissionsBoundary: !Ref BoundaryPolicyArn
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: scheduler.amazonaws.com }
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+      Policies:
+        - PolicyName: invoke-trigger
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt Function.Arn
+
+  Schedule:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      Name: tibia-highscore-trigger
+      ScheduleExpression: !Ref ScheduleExpression
+      ScheduleExpressionTimezone: UTC
+      FlexibleTimeWindow: { Mode: "OFF" }
+      State: ENABLED
+      Target:
+        Arn: !GetAtt Function.Arn
+        RoleArn: !GetAtt SchedulerRole.Arn
+        RetryPolicy:
+          MaximumRetryAttempts: 0
+
+Outputs:
+  FunctionName:
+    Value: !Ref Function
+  StateParam:
+    Value: !Ref StateParam
