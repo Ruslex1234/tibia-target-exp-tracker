@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
 Tibia Experience Tracker
-Tracks player experience from TibiaData API and sends Discord notifications for new players.
+Tracks player experience from TibiaData API and sends Discord notifications on changes.
+Two lists are tracked: alerts (one message per character to WEBHOOK) and trolls
+(one summary message per run to WEBHOOK_TROLL).
 """
 
 import json
@@ -15,10 +17,14 @@ from pathlib import Path
 
 
 # Configuration
-ALERTS_URL = "https://raw.githubusercontent.com/Ruslex1234/tibia-ops-config/refs/heads/main/.configs/alerts.json"
+CONFIG_BASE_URL = "https://raw.githubusercontent.com/Ruslex1234/tibia-ops-config/refs/heads/main/.configs"
+ALERTS_URL = f"{CONFIG_BASE_URL}/alerts.json"
+TROLLS_URL = f"{CONFIG_BASE_URL}/trolls.json"
 TIBIADATA_API_BASE = "https://api.tibiadata.com/v4"
 EXP_JSON_PATH = "exp.json"
+TROLLS_EXP_JSON_PATH = "trolls_exp.json"
 DISCORD_WEBHOOK_URL = os.environ.get("WEBHOOK", "")
+TROLL_WEBHOOK_URL = os.environ.get("WEBHOOK_TROLL", "")
 HEADERS = {
     'User-Agent': 'TibiaExpTracker/1.0 (GitHub Actions Bot)',
     'Accept': 'application/json'
@@ -41,131 +47,152 @@ def http_json(url: str, payload: Optional[Dict] = None, timeout: int = 10):
     return json.loads(body) if body else None
 
 
-def fetch_player_list() -> List[str]:
-    """Fetch the list of players to track from the alerts.json file."""
+def fetch_player_list(url: str, label: str) -> Optional[List[str]]:
+    """Fetch a list of player names, deduplicated case-insensitively. None on failure."""
     try:
-        players = http_json(ALERTS_URL)
-        print(f"✓ Fetched {len(players)} players to track")
-        return players
+        players = http_json(url)
+        if not isinstance(players, list):
+            raise ValueError(f"expected a JSON list, got {type(players).__name__}")
+        unique, seen = [], set()
+        for name in players:
+            if isinstance(name, str) and name.strip() and name.strip().lower() not in seen:
+                seen.add(name.strip().lower())
+                unique.append(name.strip())
+        print(f"✓ Fetched {len(unique)} {label} players to track")
+        return unique
     except Exception as e:
-        print(f"✗ Error fetching player list: {e}")
-        sys.exit(1)
+        print(f"✗ Error fetching {label} player list: {e}")
+        return None
 
 
-def get_character_world(character_name: str) -> Optional[str]:
-    """Get the world a character belongs to from character API."""
+# Character API vocation -> highscores vocation filter. Filtering by vocation
+# lets lower level characters show up, since each filter has its own top list.
+VOCATION_FILTERS = {
+    "knight": "knights", "elite knight": "knights",
+    "paladin": "paladins", "royal paladin": "paladins",
+    "sorcerer": "sorcerers", "master sorcerer": "sorcerers",
+    "druid": "druids", "elder druid": "druids",
+    "monk": "monks", "exalted monk": "monks",
+    "none": "none",
+}
+
+# (world, vocation filter) -> {"entries": {lower name: entry}, "next_page": int, "total_pages": int|None}
+# Shared by every list so a world's pages are fetched at most once per run.
+_highscore_cache: Dict = {}
+
+
+def get_character_info(character_name: str) -> Optional[Dict]:
+    """Get the canonical name, world and vocation from the character API."""
     try:
         encoded_name = urllib.parse.quote(character_name)
-        url = f"{TIBIADATA_API_BASE}/character/{encoded_name}"
-
-
-        data = http_json(url)
-
-        if "character" in data and "character" in data["character"]:
-            world = data["character"]["character"].get("world")
-            if world:
-                print(f"  Found world: {world}")
-                return world
-
-        return None
+        data = http_json(f"{TIBIADATA_API_BASE}/character/{encoded_name}")
+        character = (data or {}).get("character", {}).get("character", {})
+        world = character.get("world")
+        if not world:
+            return None
+        info = {
+            "name": character.get("name", character_name),
+            "world": world,
+            "vocation": character.get("vocation", "Unknown"),
+        }
+        print(f"  Found world: {world} ({info['vocation']})")
+        return info
     except Exception as e:
-        print(f"  ⚠ Could not get world from character API: {e}")
+        print(f"  ⚠ Could not get character info: {e}")
         return None
 
 
-def search_highscores_for_character(character_name: str, world: str) -> Optional[Dict]:
-    """Search highscores API to find character and get experience data."""
-    try:
+def find_in_highscores(character_name: str, world: str, voc_filter: str) -> Optional[Dict]:
+    """Look up a character in a world's experience highscores for one vocation.
 
-        # Start from page 1 and search through pages
-        page = 1
-        max_pages = 20  # TibiaData typically has ~20 pages in highscores
+    Pages are fetched lazily and cached, so later lookups in the same
+    world and vocation reuse what earlier ones already downloaded.
+    """
+    key = (world, voc_filter)
+    state = _highscore_cache.setdefault(key, {"entries": {}, "next_page": 1, "total_pages": None})
+    wanted = character_name.lower()
 
-        while page <= max_pages:
-            url = f"{TIBIADATA_API_BASE}/highscores/{world}/experience/all/{page}"
+    while wanted not in state["entries"]:
+        page = state["next_page"]
+        if state["total_pages"] is not None and page > state["total_pages"]:
+            break
+        try:
+            url = f"{TIBIADATA_API_BASE}/highscores/{urllib.parse.quote(world)}/experience/{voc_filter}/{page}"
+            highscores = (http_json(url) or {}).get("highscores")
+        except Exception as e:
+            print(f"  ✗ Error fetching highscores page {page}: {e}")
+            return None
+        if not highscores:
+            print(f"  ✗ Invalid highscores response")
+            return None
 
-            data = http_json(url)
+        for entry in highscores.get("highscore_list") or []:
+            state["entries"][entry.get("name", "").lower()] = entry
+        state["total_pages"] = highscores.get("highscore_page", {}).get("total_pages", 0)
+        state["next_page"] = page + 1
+        time.sleep(0.3)  # Small delay between page requests
 
-            if "highscores" not in data:
-                print(f"  ✗ Invalid highscores response")
-                return None
-
-            highscores = data["highscores"]
-            highscore_list = highscores.get("highscore_list", [])
-
-            # Search for character in current page
-            for entry in highscore_list:
-                if entry.get("name", "").lower() == character_name.lower():
-                    print(f"  ✓ Found in highscores (page {page}, rank {entry.get('rank')})")
-                    return {
-                        "name": entry.get("name", character_name),
-                        "world": entry.get("world", world),
-                        "experience": entry.get("value", 0),
-                        "level": entry.get("level", 0),
-                        "vocation": entry.get("vocation", "Unknown"),
-                        "rank": entry.get("rank", 0)
-                    }
-
-            # Check if we should continue to next page
-            page_info = highscores.get("highscore_page", {})
-            total_pages = page_info.get("total_pages", 0)
-
-            if page >= total_pages:
-                break
-
-            page += 1
-            time.sleep(0.3)  # Small delay between page requests
-
-        print(f"  ✗ Character not found in highscores (searched {page-1} pages)")
+    entry = state["entries"].get(wanted)
+    if not entry:
+        print(f"  ✗ Character not found in {voc_filter} highscores (searched {state['next_page'] - 1} pages)")
         return None
 
-    except Exception as e:
-        print(f"  ✗ Error searching highscores: {e}")
-        return None
+    print(f"  ✓ Found in {voc_filter} highscores (rank {entry.get('rank')})")
+    return {
+        "name": entry.get("name", character_name),
+        "world": entry.get("world", world),
+        "experience": entry.get("value", 0),
+        "level": entry.get("level", 0),
+        "vocation": entry.get("vocation", "Unknown"),
+        "rank": entry.get("rank", 0),
+        "rank_scope": voc_filter,
+    }
 
 
 def get_character_data(character_name: str) -> Optional[Dict]:
-    """Fetch character data from TibiaData API using highscores."""
+    """Fetch character data from TibiaData API using vocation filtered highscores."""
     try:
-        # Step 1: Get the character's world
-        world = get_character_world(character_name)
-
-        if not world:
+        info = get_character_info(character_name)
+        if not info:
             print(f"  ✗ Could not determine world for '{character_name}'")
             return None
 
-        # Step 2: Search highscores for the character to get accurate experience
-        char_data = search_highscores_for_character(character_name, world)
-
-        return char_data
+        voc_filter = VOCATION_FILTERS.get(info["vocation"].lower(), "all")
+        return find_in_highscores(info["name"], info["world"], voc_filter)
 
     except Exception as e:
         print(f"✗ Error fetching data for '{character_name}': {e}")
         return None
 
 
-def load_exp_data() -> Dict:
-    """Load existing exp.json data."""
-    if not Path(EXP_JSON_PATH).exists():
+def load_exp_data(path: str) -> Dict:
+    """Load existing exp data from a JSON file."""
+    if not Path(path).exists():
         return {}
 
     try:
-        with open(EXP_JSON_PATH, 'r', encoding='utf-8') as f:
+        with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
     except Exception as e:
-        print(f"✗ Error loading exp.json: {e}")
+        print(f"✗ Error loading {path}: {e}")
         return {}
 
 
-def save_exp_data(data: Dict):
-    """Save exp data to exp.json."""
+def save_exp_data(data: Dict, path: str):
+    """Save exp data to a JSON file."""
     try:
-        with open(EXP_JSON_PATH, 'w', encoding='utf-8') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-        print(f"✓ Saved exp data to {EXP_JSON_PATH}")
+        print(f"✓ Saved exp data to {path}")
     except Exception as e:
-        print(f"✗ Error saving exp.json: {e}")
+        print(f"✗ Error saving {path}: {e}")
         sys.exit(1)
+
+
+def character_link(name: str) -> str:
+    """Bold Discord markdown link to the character's tibia.com page."""
+    url = f"https://www.tibia.com/community/?subtopic=characters&name={urllib.parse.quote_plus(name)}"
+    return f"[**{name}**]({url})"
 
 
 def send_discord_notification(character_name: str, char_data: Dict, notification_type: str = "new", old_data: Optional[Dict] = None):
@@ -184,14 +211,14 @@ def send_discord_notification(character_name: str, char_data: Dict, notification
     try:
         if notification_type == "new":
             title = "🆕 New Character Tracked"
-            description = f"Started tracking **{character_name}**"
+            description = f"Started tracking {character_link(character_name)}"
             color = 3447003  # Blue
         else:  # update
             title = "📈 Experience Gained"
             old_exp = old_data.get("experience", 0) if old_data else 0
             new_exp = char_data.get("experience", 0)
             exp_gained = new_exp - old_exp
-            description = f"**{character_name}** gained **{exp_gained:,}** experience!"
+            description = f"{character_link(character_name)} gained **{exp_gained:,}** experience!"
             color = 5763719  # Green
 
         fields = [
@@ -247,7 +274,8 @@ def send_discord_notification(character_name: str, char_data: Dict, notification
             rank_text = f"#{char_data['rank']}"
 
             # Show rank change for updates
-            if notification_type == "update" and old_data and "rank" in old_data:
+            same_scope = old_data and old_data.get("rank_scope") == char_data.get("rank_scope")
+            if notification_type == "update" and same_scope and "rank" in old_data:
                 old_rank = old_data["rank"]
                 new_rank = char_data["rank"]
                 if old_rank != new_rank:
@@ -258,7 +286,7 @@ def send_discord_notification(character_name: str, char_data: Dict, notification
                         rank_text = f"#{new_rank} (↓{abs(rank_diff)})"
 
             fields.append({
-                "name": "Highscore Rank",
+                "name": f"Highscore Rank ({char_data.get('rank_scope', 'all')})",
                 "value": rank_text,
                 "inline": True
             })
@@ -281,20 +309,72 @@ def send_discord_notification(character_name: str, char_data: Dict, notification
         print(f"✗ Error sending Discord notification: {e}")
 
 
-def main():
-    """Main execution function."""
-    print("=" * 60)
-    print("Tibia Experience Tracker")
-    print("=" * 60)
+VOCATION_SHORT = {
+    "elite knight": "EK", "knight": "K",
+    "royal paladin": "RP", "paladin": "P",
+    "master sorcerer": "MS", "sorcerer": "S",
+    "elder druid": "ED", "druid": "D",
+    "exalted monk": "EM", "monk": "M",
+}
 
-    # Fetch player list
-    players = fetch_player_list()
 
-    # Load existing exp data
-    exp_data = load_exp_data()
-    print(f"✓ Loaded existing data for {len(exp_data)} characters")
+def send_troll_summary(changes: List):
+    """Send one summary of every troll whose experience changed this run.
 
-    # Track each player
+    Splits across embeds and messages to stay inside Discord limits
+    (4096 chars per embed description, 6000 chars and 10 embeds per message).
+    """
+    if not TROLL_WEBHOOK_URL:
+        print("⚠ No WEBHOOK_TROLL configured, skipping troll summary")
+        return
+
+    # Biggest gains first, losses (deaths) at the bottom
+    changes = sorted(changes, key=lambda c: c[1]["experience"] - c[2].get("experience", 0), reverse=True)
+
+    lines = []
+    for char_name, char_data, old_data in changes:
+        diff = char_data["experience"] - old_data.get("experience", 0)
+        voc = VOCATION_SHORT.get(char_data.get("vocation", "").lower(), char_data.get("vocation", "?"))
+        icon = "📈" if diff > 0 else "💀"
+        line = f"{icon} {character_link(char_data['name'])} · {voc} {char_data['level']} · {char_data['world']}\n"
+        line += f"\u2003{diff:+,} exp"
+        old_level = old_data.get("level", char_data["level"])
+        if old_level != char_data["level"]:
+            line += f" · Lvl {old_level} → {char_data['level']}"
+        lines.append(line)
+
+    descriptions, current = [], ""
+    for line in lines:
+        if current and len(current) + len(line) + 1 > 3900:
+            descriptions.append(current)
+            current = ""
+        current = f"{current}\n{line}" if current else line
+    if current:
+        descriptions.append(current)
+
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
+    embeds = []
+    for idx, description in enumerate(descriptions):
+        embed = {"description": description, "color": 15548997, "timestamp": timestamp}  # Red
+        if idx == 0:
+            embed["title"] = f"👹 Troll activity: {len(changes)} character(s) changed"
+        embeds.append(embed)
+
+    # One embed per message keeps every message under the 6000 char total
+    for idx, embed in enumerate(embeds):
+        try:
+            http_json(TROLL_WEBHOOK_URL, payload={"embeds": [embed]})
+            print(f"✓ Sent troll summary part {idx + 1}/{len(embeds)}")
+        except Exception as e:
+            print(f"✗ Error sending troll summary: {e}")
+        time.sleep(1)
+
+
+def track_players(players: List[str], exp_data: Dict):
+    """Fetch every player and diff against stored data.
+
+    Returns (updated_data, exp_changes, new_characters).
+    """
     new_characters = 0
     exp_changes = []
     updated_data = {}
@@ -302,15 +382,12 @@ def main():
     for player_name in players:
         print(f"\nProcessing: {player_name}")
 
-        # Fetch character data
         char_data = get_character_data(player_name)
 
         if char_data:
-            # Check if this is a new character or an update
             is_new = player_name not in exp_data
             old_data = exp_data.get(player_name, {})
 
-            # Store the data
             updated_data[player_name] = {
                 "name": char_data["name"],
                 "world": char_data["world"],
@@ -318,6 +395,7 @@ def main():
                 "level": char_data["level"],
                 "vocation": char_data.get("vocation", "Unknown"),
                 "rank": char_data.get("rank", 0),
+                "rank_scope": char_data.get("rank_scope", "all"),
                 "last_updated": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
             }
 
@@ -331,7 +409,6 @@ def main():
                 print(f"  ⭐ New character detected (no notification sent)")
                 new_characters += 1
             else:
-                # Check if experience has changed
                 old_exp = old_data.get("experience", 0)
                 new_exp = char_data["experience"]
 
@@ -345,12 +422,29 @@ def main():
         # Add delay to avoid rate limiting
         time.sleep(0.5)
 
-    # Save updated data
-    save_exp_data(updated_data)
+    return updated_data, exp_changes, new_characters
 
-    # Send Discord notifications for experience changes only
+
+def main():
+    """Main execution function."""
+    print("=" * 60)
+    print("Tibia Experience Tracker")
+    print("=" * 60)
+
+    # Alerts are required; trolls are best effort so a bad trolls.json never blocks alerts
+    alerts = fetch_player_list(ALERTS_URL, "alerts")
+    if alerts is None:
+        sys.exit(1)
+    trolls = fetch_player_list(TROLLS_URL, "trolls")
+
+    # ---- Alerts: one notification per character ----
+    exp_data = load_exp_data(EXP_JSON_PATH)
+    print(f"✓ Loaded existing data for {len(exp_data)} alert characters")
+
+    updated_data, exp_changes, new_characters = track_players(alerts, exp_data)
+    save_exp_data(updated_data, EXP_JSON_PATH)
+
     notifications_sent = 0
-
     if exp_changes:
         print(f"\n{'=' * 60}")
         print(f"Sending notifications for {len(exp_changes)} experience change(s)")
@@ -360,12 +454,31 @@ def main():
             notifications_sent += 1
             time.sleep(1)  # Delay between notifications
 
+    # ---- Trolls: one summary per run; alerts win on overlap ----
+    troll_updated, troll_changes = {}, []
+    if trolls is not None:
+        alert_names = {name.lower() for name in alerts}
+        trolls = [name for name in trolls if name.lower() not in alert_names]
+
+        troll_data = load_exp_data(TROLLS_EXP_JSON_PATH)
+        print(f"\n✓ Loaded existing data for {len(troll_data)} troll characters")
+
+        troll_updated, troll_changes, _ = track_players(trolls, troll_data)
+        save_exp_data(troll_updated, TROLLS_EXP_JSON_PATH)
+
+        if troll_changes:
+            print(f"\nSending troll summary for {len(troll_changes)} change(s)")
+            send_troll_summary(troll_changes)
+
     print(f"\n{'=' * 60}")
     print(f"✓ Tracking complete!")
-    print(f"  Total characters tracked: {len(updated_data)}")
-    print(f"  New characters added: {new_characters}")
-    print(f"  Experience changes: {len(exp_changes)}")
+    print(f"  Alert characters tracked: {len(updated_data)}")
+    print(f"  New alert characters added: {new_characters}")
+    print(f"  Alert experience changes: {len(exp_changes)}")
     print(f"  Discord notifications sent: {notifications_sent}")
+    if trolls is not None:
+        print(f"  Troll characters tracked: {len(troll_updated)} of {len(trolls)}")
+        print(f"  Troll experience changes: {len(troll_changes)}")
     print("=" * 60)
 
 

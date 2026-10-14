@@ -30,19 +30,22 @@ jobs:
       - name: Run experience tracker
         env:
           WEBHOOK: ${{ secrets.WEBHOOK }}
+          WEBHOOK_TROLL: ${{ secrets.WEBHOOK_TROLL }}
         run: |
           python3 track_exp.py
 
-      - name: Commit and push exp.json updates
+      - name: Commit and push exp data updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Check if exp.json has changes
-          if git diff --quiet exp.json; then
-            echo "No changes to exp.json"
+          # Check if either data file changed (status also catches a new untracked file)
+          if [ -z "$(git status --porcelain -- exp.json trolls_exp.json)" ]; then
+            echo "No changes to exp data"
           else
-            git add exp.json
+            for f in exp.json trolls_exp.json; do
+              if [ -e "$f" ]; then git add -- "$f"; fi
+            done
             git commit -m "Update experience data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
             git pull --rebase origin "${GITHUB_REF_NAME}"
             git push
