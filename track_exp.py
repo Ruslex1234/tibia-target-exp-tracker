@@ -189,6 +189,12 @@ def save_exp_data(data: Dict, path: str):
         sys.exit(1)
 
 
+def character_link(name: str) -> str:
+    """Bold Discord markdown link to the character's tibia.com page."""
+    url = f"https://www.tibia.com/community/?subtopic=characters&name={urllib.parse.quote_plus(name)}"
+    return f"[**{name}**]({url})"
+
+
 def send_discord_notification(character_name: str, char_data: Dict, notification_type: str = "new", old_data: Optional[Dict] = None):
     """Send Discord webhook notification for character updates.
 
@@ -205,14 +211,14 @@ def send_discord_notification(character_name: str, char_data: Dict, notification
     try:
         if notification_type == "new":
             title = "🆕 New Character Tracked"
-            description = f"Started tracking **{character_name}**"
+            description = f"Started tracking {character_link(character_name)}"
             color = 3447003  # Blue
         else:  # update
             title = "📈 Experience Gained"
             old_exp = old_data.get("experience", 0) if old_data else 0
             new_exp = char_data.get("experience", 0)
             exp_gained = new_exp - old_exp
-            description = f"**{character_name}** gained **{exp_gained:,}** experience!"
+            description = f"{character_link(character_name)} gained **{exp_gained:,}** experience!"
             color = 5763719  # Green
 
         fields = [
@@ -330,7 +336,7 @@ def send_troll_summary(changes: List):
         diff = char_data["experience"] - old_data.get("experience", 0)
         voc = VOCATION_SHORT.get(char_data.get("vocation", "").lower(), char_data.get("vocation", "?"))
         icon = "📈" if diff > 0 else "💀"
-        line = f"{icon} **{char_data['name']}** · {voc} {char_data['level']} · {char_data['world']}\n"
+        line = f"{icon} {character_link(char_data['name'])} · {voc} {char_data['level']} · {char_data['world']}\n"
         line += f"\u2003{diff:+,} exp"
         old_level = old_data.get("level", char_data["level"])
         if old_level != char_data["level"]:
