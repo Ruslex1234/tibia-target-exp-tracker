@@ -59,7 +59,7 @@ https://raw.githubusercontent.com/Ruslex1234/tibia-ops-config/refs/heads/main/.c
 
 ### Highscore Lookup
 
-Each character's vocation comes from the character API, and the tracker searches that world's experience highscores **filtered by vocation**. Each vocation has its own top list, so lower level characters are found that would not show up in the combined list. Pages are cached per world and vocation, so each page is downloaded at most once per run. The stored `rank` is the vocation rank (`rank_scope` says which list).
+Each character's vocation comes from the character API, and the tracker searches that world's experience highscores **filtered by vocation**. The public TibiaData API runs in restriction mode and rejects vocation filters with HTTP 400; when that happens the tracker falls back to the combined `all` list (top 1000 per world) for the rest of the run. Pages are cached per world and filter, so each page is downloaded at most once per run. If a lookup fails, the last known data is kept instead of being dropped.
 
 ### Discord Webhook
 

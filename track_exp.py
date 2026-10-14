@@ -10,6 +10,7 @@ import json
 import os
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Dict, List, Optional
@@ -80,6 +81,11 @@ VOCATION_FILTERS = {
 # Shared by every list so a world's pages are fetched at most once per run.
 _highscore_cache: Dict = {}
 
+# The public TibiaData instance runs in restriction mode, which answers 400 to
+# any vocation other than "all". Flipped off on the first 400 so the rest of the
+# run goes straight to the combined list.
+vocation_filters_enabled = True
+
 
 def get_character_info(character_name: str) -> Optional[Dict]:
     """Get the canonical name, world and vocation from the character API."""
@@ -119,6 +125,14 @@ def find_in_highscores(character_name: str, world: str, voc_filter: str) -> Opti
         try:
             url = f"{TIBIADATA_API_BASE}/highscores/{urllib.parse.quote(world)}/experience/{voc_filter}/{page}"
             highscores = (http_json(url) or {}).get("highscores")
+        except urllib.error.HTTPError as e:
+            if e.code == 400 and voc_filter != "all":
+                global vocation_filters_enabled
+                vocation_filters_enabled = False
+                print(f"  ⚠ Vocation filter '{voc_filter}' rejected (HTTP 400), using 'all' from now on")
+                return find_in_highscores(character_name, world, "all")
+            print(f"  ✗ Error fetching highscores page {page}: {e}")
+            return None
         except Exception as e:
             print(f"  ✗ Error fetching highscores page {page}: {e}")
             return None
@@ -157,7 +171,7 @@ def get_character_data(character_name: str) -> Optional[Dict]:
             print(f"  ✗ Could not determine world for '{character_name}'")
             return None
 
-        voc_filter = VOCATION_FILTERS.get(info["vocation"].lower(), "all")
+        voc_filter = VOCATION_FILTERS.get(info["vocation"].lower(), "all") if vocation_filters_enabled else "all"
         return find_in_highscores(info["name"], info["world"], voc_filter)
 
     except Exception as e:
@@ -418,6 +432,10 @@ def track_players(players: List[str], exp_data: Dict):
                     exp_changes.append((player_name, char_data, old_data))
                 else:
                     print(f"  ✓ No experience change")
+        elif player_name in exp_data:
+            # Keep the last known data so an API hiccup doesn't wipe history
+            updated_data[player_name] = exp_data[player_name]
+            print(f"  ↺ Lookup failed, keeping last known data")
 
         # Add delay to avoid rate limiting
         time.sleep(0.5)
