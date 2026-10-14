@@ -5,8 +5,8 @@
     "experience": 15199713593,
     "level": 971,
     "vocation": "Elite Knight",
-    "rank": 310,
-    "last_updated": "2026-10-14 08:47:49 UTC"
+    "rank": 309,
+    "last_updated": "2026-10-14 09:07:48 UTC"
   },
   "Julio Blocker": {
     "name": "Julio Blocker",
@@ -14,8 +14,8 @@
     "experience": 914890882,
     "level": 382,
     "vocation": "Elite Knight",
-    "rank": 683,
-    "last_updated": "2026-10-14 08:48:02 UTC"
+    "rank": 682,
+    "last_updated": "2026-10-14 09:07:56 UTC"
   },
   "Psycho Barbie": {
     "name": "Psycho Barbie",
@@ -23,8 +23,8 @@
     "experience": 1095337704,
     "level": 405,
     "vocation": "Elder Druid",
-    "rank": 593,
-    "last_updated": "2026-10-14 08:48:16 UTC"
+    "rank": 592,
+    "last_updated": "2026-10-14 09:08:14 UTC"
   },
   "Kuroashii": {
     "name": "Kuroashii",
@@ -33,7 +33,7 @@
     "level": 573,
     "vocation": "Knight",
     "rank": 246,
-    "last_updated": "2026-10-14 08:48:18 UTC"
+    "last_updated": "2026-10-14 09:08:17 UTC"
   },
   "Ohellnaw": {
     "name": "Ohellnaw",
@@ -42,6 +42,6 @@
     "level": 966,
     "vocation": "Royal Paladin",
     "rank": 40,
-    "last_updated": "2026-10-14 08:48:19 UTC"
+    "last_updated": "2026-10-14 09:08:17 UTC"
   }
 }
