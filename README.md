@@ -54,12 +54,12 @@ https://raw.githubusercontent.com/Ruslex1234/tibia-ops-config/refs/heads/main/.c
 - State is stored separately in `trolls_exp.json`
 - Instead of one message per character, each run sends **one summary** to the `WEBHOOK_TROLL` secret, listing every troll whose exp changed (biggest gains first, deaths at the bottom)
 - Names that also appear in `alerts.json` are tracked only as alerts
-- Duplicate names are ignored; characters not on their vocation highscores are skipped
+- Duplicate names are ignored; characters not on their world's highscores are skipped
 - If `trolls.json` can't be fetched, alerts still run normally
 
 ### Highscore Lookup
 
-Each character's vocation comes from the character API, and the tracker searches that world's experience highscores **filtered by vocation**. Each vocation has its own top list, so lower level characters are found that would not show up in the combined list. Pages are cached per world and vocation, so each page is downloaded at most once per run. The stored `rank` is the vocation rank (`rank_scope` says which list).
+Each character's world comes from the character API, then the tracker finds them in that world's experience highscores (top 1000). Pages are cached per world, so each page is downloaded at most once per run no matter how many tracked characters share a world. If a lookup fails, the last known data is kept instead of being dropped.
 
 ### Discord Webhook
 
