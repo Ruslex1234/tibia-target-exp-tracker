@@ -10,7 +10,6 @@ import json
 import os
 import sys
 import time
-import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Dict, List, Optional
@@ -66,25 +65,9 @@ def fetch_player_list(url: str, label: str) -> Optional[List[str]]:
         return None
 
 
-# Character API vocation -> highscores vocation filter. Filtering by vocation
-# lets lower level characters show up, since each filter has its own top list.
-VOCATION_FILTERS = {
-    "knight": "knights", "elite knight": "knights",
-    "paladin": "paladins", "royal paladin": "paladins",
-    "sorcerer": "sorcerers", "master sorcerer": "sorcerers",
-    "druid": "druids", "elder druid": "druids",
-    "monk": "monks", "exalted monk": "monks",
-    "none": "none",
-}
-
-# (world, vocation filter) -> {"entries": {lower name: entry}, "next_page": int, "total_pages": int|None}
+# world -> {"entries": {lower name: entry}, "next_page": int, "total_pages": int|None}
 # Shared by every list so a world's pages are fetched at most once per run.
 _highscore_cache: Dict = {}
-
-# The public TibiaData instance runs in restriction mode, which answers 400 to
-# any vocation other than "all". Flipped off on the first 400 so the rest of the
-# run goes straight to the combined list.
-vocation_filters_enabled = True
 
 
 def get_character_info(character_name: str) -> Optional[Dict]:
@@ -108,14 +91,13 @@ def get_character_info(character_name: str) -> Optional[Dict]:
         return None
 
 
-def find_in_highscores(character_name: str, world: str, voc_filter: str) -> Optional[Dict]:
-    """Look up a character in a world's experience highscores for one vocation.
+def find_in_highscores(character_name: str, world: str) -> Optional[Dict]:
+    """Look up a character in a world's experience highscores.
 
     Pages are fetched lazily and cached, so later lookups in the same
-    world and vocation reuse what earlier ones already downloaded.
+    world reuse what earlier ones already downloaded.
     """
-    key = (world, voc_filter)
-    state = _highscore_cache.setdefault(key, {"entries": {}, "next_page": 1, "total_pages": None})
+    state = _highscore_cache.setdefault(world, {"entries": {}, "next_page": 1, "total_pages": None})
     wanted = character_name.lower()
 
     while wanted not in state["entries"]:
@@ -123,16 +105,8 @@ def find_in_highscores(character_name: str, world: str, voc_filter: str) -> Opti
         if state["total_pages"] is not None and page > state["total_pages"]:
             break
         try:
-            url = f"{TIBIADATA_API_BASE}/highscores/{urllib.parse.quote(world)}/experience/{voc_filter}/{page}"
+            url = f"{TIBIADATA_API_BASE}/highscores/{urllib.parse.quote(world)}/experience/all/{page}"
             highscores = (http_json(url) or {}).get("highscores")
-        except urllib.error.HTTPError as e:
-            if e.code == 400 and voc_filter != "all":
-                global vocation_filters_enabled
-                vocation_filters_enabled = False
-                print(f"  ⚠ Vocation filter '{voc_filter}' rejected (HTTP 400), using 'all' from now on")
-                return find_in_highscores(character_name, world, "all")
-            print(f"  ✗ Error fetching highscores page {page}: {e}")
-            return None
         except Exception as e:
             print(f"  ✗ Error fetching highscores page {page}: {e}")
             return None
@@ -148,10 +122,10 @@ def find_in_highscores(character_name: str, world: str, voc_filter: str) -> Opti
 
     entry = state["entries"].get(wanted)
     if not entry:
-        print(f"  ✗ Character not found in {voc_filter} highscores (searched {state['next_page'] - 1} pages)")
+        print(f"  ✗ Character not found in highscores (searched {state['next_page'] - 1} pages)")
         return None
 
-    print(f"  ✓ Found in {voc_filter} highscores (rank {entry.get('rank')})")
+    print(f"  ✓ Found in highscores (rank {entry.get('rank')})")
     return {
         "name": entry.get("name", character_name),
         "world": entry.get("world", world),
@@ -159,20 +133,18 @@ def find_in_highscores(character_name: str, world: str, voc_filter: str) -> Opti
         "level": entry.get("level", 0),
         "vocation": entry.get("vocation", "Unknown"),
         "rank": entry.get("rank", 0),
-        "rank_scope": voc_filter,
     }
 
 
 def get_character_data(character_name: str) -> Optional[Dict]:
-    """Fetch character data from TibiaData API using vocation filtered highscores."""
+    """Fetch character data from TibiaData API using highscores."""
     try:
         info = get_character_info(character_name)
         if not info:
             print(f"  ✗ Could not determine world for '{character_name}'")
             return None
 
-        voc_filter = VOCATION_FILTERS.get(info["vocation"].lower(), "all") if vocation_filters_enabled else "all"
-        return find_in_highscores(info["name"], info["world"], voc_filter)
+        return find_in_highscores(info["name"], info["world"])
 
     except Exception as e:
         print(f"✗ Error fetching data for '{character_name}': {e}")
@@ -288,8 +260,7 @@ def send_discord_notification(character_name: str, char_data: Dict, notification
             rank_text = f"#{char_data['rank']}"
 
             # Show rank change for updates
-            same_scope = old_data and old_data.get("rank_scope") == char_data.get("rank_scope")
-            if notification_type == "update" and same_scope and "rank" in old_data:
+            if notification_type == "update" and old_data and "rank" in old_data:
                 old_rank = old_data["rank"]
                 new_rank = char_data["rank"]
                 if old_rank != new_rank:
@@ -300,7 +271,7 @@ def send_discord_notification(character_name: str, char_data: Dict, notification
                         rank_text = f"#{new_rank} (↓{abs(rank_diff)})"
 
             fields.append({
-                "name": f"Highscore Rank ({char_data.get('rank_scope', 'all')})",
+                "name": "Highscore Rank",
                 "value": rank_text,
                 "inline": True
             })
@@ -409,7 +380,6 @@ def track_players(players: List[str], exp_data: Dict):
                 "level": char_data["level"],
                 "vocation": char_data.get("vocation", "Unknown"),
                 "rank": char_data.get("rank", 0),
-                "rank_scope": char_data.get("rank_scope", "all"),
                 "last_updated": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
             }
 
