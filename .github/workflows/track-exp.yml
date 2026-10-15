@@ -1,15 +1,15 @@
 name: Track Tibia Experience
 
+# Runs are started externally via workflow_dispatch every 20 minutes. There is
+# deliberately no schedule trigger: a second trigger only adds runs that queue
+# behind the lock below.
 on:
-  schedule:
-    # Run every 30 minutes
-    - cron: '*/30 * * * *'
-  workflow_dispatch: # Allow manual triggering
+  workflow_dispatch:
 
 permissions:
   contents: write
 
-# Never let two runs overlap and race each other on the exp.json push
+# Never let two runs overlap and race each other on the data file push
 concurrency:
   group: track-exp
   cancel-in-progress: false
@@ -20,9 +20,12 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      # Check out the branch tip, not the triggering commit, so a run that
+      # waited in the queue compares against the data the previous run saved.
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
+          ref: ${{ github.ref_name }}
           fetch-depth: 1
 
       # No setup or install steps: the script uses only the Python standard
@@ -32,21 +35,48 @@ jobs:
           WEBHOOK: ${{ secrets.WEBHOOK }}
           WEBHOOK_TROLL: ${{ secrets.WEBHOOK_TROLL }}
         run: |
-          python3 track_exp.py
+          python3 -u track_exp.py
 
       - name: Commit and push exp data updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Check if either data file changed (status also catches a new untracked file)
-          if [ -z "$(git status --porcelain -- exp.json trolls_exp.json)" ]; then
-            echo "No changes to exp data"
-          else
-            for f in exp.json trolls_exp.json; do
+          files="exp.json trolls_exp.json"
+          branch="${GITHUB_REF_NAME}"
+
+          # Keep this run's data aside, then for each attempt: start from the
+          # remote tip, lay our files on top and commit. Our files are the
+          # newest observation, so they win whole (no line merges of JSON).
+          mkdir -p "$RUNNER_TEMP/exp-data"
+          for f in $files; do
+            if [ -e "$f" ]; then cp -- "$f" "$RUNNER_TEMP/exp-data/"; fi
+          done
+
+          for attempt in 1 2 3 4; do
+            git fetch --depth=1 origin "$branch"
+            git reset --hard "origin/$branch"
+            for f in $files; do
+              if [ -e "$RUNNER_TEMP/exp-data/$f" ]; then cp -- "$RUNNER_TEMP/exp-data/$f" "$f"; fi
+            done
+
+            if [ -z "$(git status --porcelain -- $files)" ]; then
+              echo "No changes to exp data"
+              exit 0
+            fi
+
+            for f in $files; do
               if [ -e "$f" ]; then git add -- "$f"; fi
             done
-            git commit -m "Update experience data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-            git pull --rebase origin "${GITHUB_REF_NAME}"
-            git push
-          fi
+            git commit -q -m "Update experience data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+            if git push origin "HEAD:$branch"; then
+              echo "Pushed on attempt $attempt"
+              exit 0
+            fi
+            echo "Push failed (attempt $attempt), retrying in $((2 ** attempt))s"
+            sleep $((2 ** attempt))
+          done
+
+          echo "Giving up after 4 push attempts"
+          exit 1

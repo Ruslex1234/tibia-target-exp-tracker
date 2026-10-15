@@ -10,7 +10,7 @@ An automated experience tracker for Tibia characters using the TibiaData API. Th
   - Experience changes (gain/loss)
   - Level changes
   - Rank changes in highscores
-- **GitHub Actions**: Runs automatically on a schedule via GitHub Actions
+- **GitHub Actions**: Runs via GitHub Actions, triggered externally every 20 minutes
 - **JSON Storage**: Stores experience data in a simple JSON format
 
 ## How It Works
@@ -87,9 +87,12 @@ The Discord webhook URL must be configured as a repository secret:
 
 ## Workflow Schedule
 
-The tracker runs automatically:
-- **Every 30 minutes** (at :00 and :30 of each hour)
-- **Manual trigger** available via GitHub Actions UI
+The workflow has only a `workflow_dispatch` trigger. An external scheduler calls it every 20 minutes (:07, :27, :47), and it can also be run by hand from the Actions tab. There is no `schedule:` cron on purpose: a second trigger only produced runs that queued behind the concurrency lock and started from stale data.
+
+Reliability:
+- Each run checks out the latest commit on the branch, so it always compares against the data the previous run saved
+- TibiaData requests are retried on 429/5xx/network errors (waits of 2s and 5s); Discord posts are never retried, so nothing is sent twice
+- The data commit is pushed with up to 4 attempts; each attempt starts from the remote tip and writes this run's data files on top whole, so JSON is never line merged
 
 ## Data Format
 
