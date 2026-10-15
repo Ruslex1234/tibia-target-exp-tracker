@@ -1,0 +1,30 @@
+name: Probe tibia.com highscores
+
+# Experiment: checks whether GitHub-hosted runners can read tibia.com
+# highscores directly (Cloudflare may block datacenter IPs).
+on:
+  workflow_dispatch:
+    inputs:
+      world:
+        description: World to probe
+        default: Firmera
+  push:
+    paths:
+      - probe/tibia_com_probe.py
+      - .github/workflows/tibia-com-probe.yml
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Fetch tibia.com highscores per vocation
+        env:
+          PROBE_WORLD: ${{ inputs.world || 'Firmera' }}
+        run: python3 -u probe/tibia_com_probe.py
