@@ -10,6 +10,7 @@ import json
 import os
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Dict, List, Optional
@@ -29,22 +30,39 @@ HEADERS = {
     'User-Agent': 'TibiaExpTracker/1.0 (GitHub Actions Bot)',
     'Accept': 'application/json'
 }
+# Waits between retries of a failed GET (TibiaData answers 502/503 now and then)
+RETRY_DELAYS = (2, 5)
 
 
 def http_json(url: str, payload: Optional[Dict] = None, timeout: int = 10):
     """GET (or POST when payload is given) using only the standard library.
 
     Raises urllib.error.HTTPError on non-2xx responses, like raise_for_status().
+    GETs are retried on 429, 5xx and network errors; POSTs are sent once so a
+    Discord message is never posted twice.
     """
     headers = dict(HEADERS)
     data = None
     if payload is not None:
         data = json.dumps(payload).encode("utf-8")
         headers["Content-Type"] = "application/json"
-    req = urllib.request.Request(url, data=data, headers=headers)
-    with urllib.request.urlopen(req, timeout=timeout) as response:
-        body = response.read()
-    return json.loads(body) if body else None
+    delays = RETRY_DELAYS if payload is None else ()
+
+    for attempt in range(len(delays) + 1):
+        req = urllib.request.Request(url, data=data, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as response:
+                body = response.read()
+            return json.loads(body) if body else None
+        except urllib.error.HTTPError as e:
+            if attempt == len(delays) or not (e.code == 429 or e.code >= 500):
+                raise
+            print(f"  ↻ HTTP {e.code}, retrying in {delays[attempt]}s")
+        except (urllib.error.URLError, TimeoutError) as e:
+            if attempt == len(delays):
+                raise
+            print(f"  ↻ {getattr(e, 'reason', e)}, retrying in {delays[attempt]}s")
+        time.sleep(delays[attempt])
 
 
 def fetch_player_list(url: str, label: str) -> Optional[List[str]]:
