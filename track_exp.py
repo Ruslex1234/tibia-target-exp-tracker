@@ -339,12 +339,13 @@ def send_troll_summary(changes: List):
         diff = char_data["experience"] - old_data.get("experience", 0)
         voc = VOCATION_SHORT.get(char_data.get("vocation", "").lower(), char_data.get("vocation", "?"))
         icon = "📈" if diff > 0 else "💀"
-        line = f"{icon} {character_link(char_data['name'])} · {voc} {char_data['level']} · {char_data['world']}\n"
-        line += f"\u2003{diff:+,} exp"
+        # One line per character; a level change shows in place of the level
         old_level = old_data.get("level", char_data["level"])
-        if old_level != char_data["level"]:
-            line += f" · Lvl {old_level} → {char_data['level']}"
-        lines.append(line)
+        level = char_data["level"] if old_level == char_data["level"] else f"{old_level} → {char_data['level']}"
+        lines.append(
+            f"{icon} {character_link(char_data['name'])} · {voc} {level} · "
+            f"{char_data['world']} · **{diff:+,}** exp"
+        )
 
     descriptions, current = [], ""
     for line in lines:
