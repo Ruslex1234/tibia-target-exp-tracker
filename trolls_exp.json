@@ -2,11 +2,11 @@
   "Sleeping Booty": {
     "name": "Sleeping Booty",
     "world": "Tempestera",
-    "experience": 312118335,
-    "level": 267,
+    "experience": 314249929,
+    "level": 268,
     "vocation": "Royal Paladin",
-    "rank": 865,
-    "last_updated": "2026-10-26 10:48:08 UTC"
+    "rank": 863,
+    "last_updated": "2026-10-26 11:08:04 UTC"
   },
   "Krod": {
     "name": "Krod",
@@ -15,7 +15,7 @@
     "level": 626,
     "vocation": "Royal Paladin",
     "rank": 86,
-    "last_updated": "2026-10-26 10:48:08 UTC"
+    "last_updated": "2026-10-26 11:08:05 UTC"
   },
   "Amm Sky": {
     "name": "Amm Sky",
@@ -24,115 +24,115 @@
     "level": 375,
     "vocation": "Royal Paladin",
     "rank": 715,
-    "last_updated": "2026-10-26 10:48:11 UTC"
+    "last_updated": "2026-10-26 11:08:07 UTC"
   },
   "Rodryk Style": {
     "name": "Rodryk Style",
     "world": "Firmera",
-    "experience": 1806407585,
-    "level": 478,
+    "experience": 1809266993,
+    "level": 479,
     "vocation": "Royal Paladin",
     "rank": 410,
-    "last_updated": "2026-10-26 10:48:11 UTC"
+    "last_updated": "2026-10-26 11:08:07 UTC"
   },
   "Parangarih": {
     "name": "Parangarih",
     "world": "Firmera",
-    "experience": 760936837,
+    "experience": 763084384,
     "level": 359,
     "vocation": "Royal Paladin",
-    "rank": 783,
-    "last_updated": "2026-10-26 10:48:13 UTC"
+    "rank": 782,
+    "last_updated": "2026-10-26 11:08:09 UTC"
   },
   "El Rod": {
     "name": "El Rod",
     "world": "Tempestera",
-    "experience": 2280202784,
+    "experience": 2285357294,
     "level": 517,
     "vocation": "Royal Paladin",
     "rank": 152,
-    "last_updated": "2026-10-26 10:48:17 UTC"
+    "last_updated": "2026-10-26 11:08:13 UTC"
   },
   "Mykera Da Rod": {
     "name": "Mykera Da Rod",
     "world": "Tempestera",
-    "experience": 2154207125,
+    "experience": 2156229049,
     "level": 507,
     "vocation": "Royal Paladin",
-    "rank": 168,
-    "last_updated": "2026-10-26 10:48:18 UTC"
+    "rank": 167,
+    "last_updated": "2026-10-26 11:08:14 UTC"
   },
   "Yelsew Element": {
     "name": "Yelsew Element",
     "world": "Tempestera",
-    "experience": 2107692454,
-    "level": 503,
+    "experience": 2109700420,
+    "level": 504,
     "vocation": "Royal Paladin",
     "rank": 170,
-    "last_updated": "2026-10-26 10:48:18 UTC"
+    "last_updated": "2026-10-26 11:08:14 UTC"
   },
   "Pelon Rod sinleche": {
     "name": "Pelon Rod sinleche",
     "world": "Tempestera",
-    "experience": 1462056710,
+    "experience": 1464724694,
     "level": 446,
     "vocation": "Royal Paladin",
     "rank": 226,
-    "last_updated": "2026-10-26 10:48:19 UTC"
+    "last_updated": "2026-10-26 11:08:15 UTC"
   },
   "Rod sin Jotape": {
     "name": "Rod sin Jotape",
     "world": "Tempestera",
-    "experience": 1441772888,
+    "experience": 1443543568,
     "level": 444,
     "vocation": "Royal Paladin",
     "rank": 228,
-    "last_updated": "2026-10-26 10:48:20 UTC"
+    "last_updated": "2026-10-26 11:08:16 UTC"
   },
   "Diez Minibankers incluyendome": {
     "name": "Diez Minibankers incluyendome",
     "world": "Tempestera",
-    "experience": 1248386389,
+    "experience": 1250073319,
     "level": 423,
     "vocation": "Royal Paladin",
     "rank": 262,
-    "last_updated": "2026-10-26 10:48:21 UTC"
+    "last_updated": "2026-10-26 11:08:17 UTC"
   },
   "Retro Rod": {
     "name": "Retro Rod",
     "world": "Tempestera",
-    "experience": 805554509,
+    "experience": 806284316,
     "level": 366,
     "vocation": "Royal Paladin",
-    "rank": 398,
-    "last_updated": "2026-10-26 10:48:21 UTC"
+    "rank": 397,
+    "last_updated": "2026-10-26 11:08:18 UTC"
   },
   "Horkside": {
     "name": "Horkside",
     "world": "Tempestera",
-    "experience": 480445061,
+    "experience": 481059215,
     "level": 308,
     "vocation": "Royal Paladin",
     "rank": 628,
-    "last_updated": "2026-10-26 10:48:32 UTC"
+    "last_updated": "2026-10-26 11:08:28 UTC"
   },
   "Vian Chinan": {
     "name": "Vian Chinan",
     "world": "Firmera",
-    "experience": 659548593,
-    "level": 342,
+    "experience": 660912495,
+    "level": 343,
     "vocation": "Royal Paladin",
-    "rank": 858,
-    "last_updated": "2026-10-26 10:48:33 UTC"
+    "rank": 857,
+    "last_updated": "2026-10-26 11:08:29 UTC"
   },
   "El Marino Loko": {
     "name": "El Marino Loko",
     "world": "Firmera",
-    "experience": 966215819,
+    "experience": 967767157,
     "level": 389,
     "vocation": "Royal Paladin",
-    "rank": 667,
-    "last_updated": "2026-10-26 10:48:33 UTC"
+    "rank": 666,
+    "last_updated": "2026-10-26 11:08:30 UTC"
   },
   "Duckeziitho El Bully": {
     "name": "Duckeziitho El Bully",
@@ -141,7 +141,7 @@
     "level": 318,
     "vocation": "Master Sorcerer",
     "rank": 583,
-    "last_updated": "2026-10-26 10:48:34 UTC"
+    "last_updated": "2026-10-26 11:08:30 UTC"
   },
   "Romanov": {
     "name": "Romanov",
@@ -150,7 +150,7 @@
     "level": 322,
     "vocation": "Elder Druid",
     "rank": 569,
-    "last_updated": "2026-10-26 10:48:47 UTC"
+    "last_updated": "2026-10-26 11:08:43 UTC"
   },
   "Rodlex": {
     "name": "Rodlex",
@@ -159,7 +159,7 @@
     "level": 1316,
     "vocation": "Royal Paladin",
     "rank": 3,
-    "last_updated": "2026-10-26 10:48:52 UTC"
+    "last_updated": "2026-10-26 11:08:48 UTC"
   },
   "Ruslex": {
     "name": "Ruslex",
@@ -168,7 +168,7 @@
     "level": 946,
     "vocation": "Royal Paladin",
     "rank": 309,
-    "last_updated": "2026-10-26 10:48:55 UTC"
+    "last_updated": "2026-10-26 11:08:51 UTC"
   },
   "Garpy": {
     "name": "Garpy",
@@ -177,7 +177,7 @@
     "level": 450,
     "vocation": "Elder Druid",
     "rank": 458,
-    "last_updated": "2026-10-26 10:49:18 UTC"
+    "last_updated": "2026-10-26 11:09:08 UTC"
   },
   "Zalain": {
     "name": "Zalain",
@@ -186,7 +186,7 @@
     "level": 1181,
     "vocation": "Elder Druid",
     "rank": 137,
-    "last_updated": "2026-10-26 10:49:18 UTC"
+    "last_updated": "2026-10-26 11:09:08 UTC"
   },
   "Raven Trevor": {
     "name": "Raven Trevor",
@@ -195,16 +195,16 @@
     "level": 392,
     "vocation": "Royal Paladin",
     "rank": 652,
-    "last_updated": "2026-10-26 10:49:19 UTC"
+    "last_updated": "2026-10-26 11:09:09 UTC"
   },
   "Murillauws": {
     "name": "Murillauws",
     "world": "Firmera",
-    "experience": 1002397897,
+    "experience": 1003181542,
     "level": 393,
     "vocation": "Elder Druid",
     "rank": 647,
-    "last_updated": "2026-10-26 10:49:24 UTC"
+    "last_updated": "2026-10-26 11:09:14 UTC"
   },
   "Curly Moe": {
     "name": "Curly Moe",
@@ -213,7 +213,7 @@
     "level": 384,
     "vocation": "Royal Paladin",
     "rank": 679,
-    "last_updated": "2026-10-26 10:49:25 UTC"
+    "last_updated": "2026-10-26 11:09:15 UTC"
   },
   "Salfeni": {
     "name": "Salfeni",
@@ -222,6 +222,6 @@
     "level": 361,
     "vocation": "Royal Paladin",
     "rank": 771,
-    "last_updated": "2026-10-26 10:49:26 UTC"
+    "last_updated": "2026-10-26 11:09:16 UTC"
   }
 }
