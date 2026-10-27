@@ -21,7 +21,7 @@ from pathlib import Path
 CONFIG_BASE_URL = "https://raw.githubusercontent.com/Ruslex1234/tibia-ops-config/refs/heads/main/.configs"
 ALERTS_URL = f"{CONFIG_BASE_URL}/alerts.json"
 TROLLS_URL = f"{CONFIG_BASE_URL}/trolls.json"
-TIBIADATA_API_BASE = "https://api.tibiadata.com/v4"
+TIBIADATA_API_BASE = "https://api.tibiadata.com/v5"
 EXP_JSON_PATH = "exp.json"
 TROLLS_EXP_JSON_PATH = "trolls_exp.json"
 DISCORD_WEBHOOK_URL = os.environ.get("WEBHOOK", "")
