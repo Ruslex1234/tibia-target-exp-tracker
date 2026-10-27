@@ -5,7 +5,7 @@ An automated experience tracker for Tibia characters using the TibiaData API. Th
 ## Features
 
 - **Automatic Tracking**: Monitors multiple Tibia characters automatically
-- **TibiaData Integration**: Uses the official TibiaData API v4 for accurate data
+- **TibiaData Integration**: Uses the official TibiaData API v5 for accurate data
 - **Discord Notifications**: Sends notifications only when experience changes, showing:
   - Experience changes (gain/loss)
   - Level changes
@@ -153,8 +153,8 @@ The GitHub Actions workflow requires:
 
 ## API Reference
 
-This project uses the TibiaData API v4:
-- **Base URL**: `https://api.tibiadata.com/v4`
+This project uses the TibiaData API v5:
+- **Base URL**: `https://api.tibiadata.com/v5`
 - **Character Endpoint**: `/character/{name}` - Used to get character's world
 - **Highscores Endpoint**: `/highscores/{world}/experience/all/{page}` - Used to get accurate experience data
 - **Documentation**: [TibiaData.com](https://tibiadata.com)
