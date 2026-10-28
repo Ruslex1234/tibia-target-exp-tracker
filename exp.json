@@ -6,16 +6,16 @@
     "level": 978,
     "vocation": "Elite Knight",
     "rank": 300,
-    "last_updated": "2026-10-28 12:47:51 UTC"
+    "last_updated": "2026-10-28 13:07:49 UTC"
   },
   "Psycho Barbie": {
     "name": "Psycho Barbie",
     "world": "Firmera",
-    "experience": 1095340311,
+    "experience": 1095344639,
     "level": 405,
     "vocation": "Elder Druid",
     "rank": 602,
-    "last_updated": "2026-10-28 12:47:59 UTC"
+    "last_updated": "2026-10-28 13:07:58 UTC"
   },
   "Kuroashii": {
     "name": "Kuroashii",
@@ -24,7 +24,7 @@
     "level": 573,
     "vocation": "Knight",
     "rank": 254,
-    "last_updated": "2026-10-28 12:47:59 UTC"
+    "last_updated": "2026-10-28 13:07:59 UTC"
   },
   "Ohellnaw": {
     "name": "Ohellnaw",
@@ -33,6 +33,6 @@
     "level": 969,
     "vocation": "Royal Paladin",
     "rank": 45,
-    "last_updated": "2026-10-28 12:48:00 UTC"
+    "last_updated": "2026-10-28 13:08:00 UTC"
   }
 }
