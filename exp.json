@@ -15,7 +15,7 @@
     "level": 405,
     "vocation": "Elder Druid",
     "rank": 603,
-    "last_updated": "2026-10-30 04:27:55 UTC"
+    "last_updated": "2026-10-30 04:48:38 UTC"
   },
   "Kuroashii": {
     "name": "Kuroashii",
@@ -24,15 +24,15 @@
     "level": 573,
     "vocation": "Knight",
     "rank": 254,
-    "last_updated": "2026-10-30 04:27:55 UTC"
+    "last_updated": "2026-10-30 04:48:38 UTC"
   },
   "Ohellnaw": {
     "name": "Ohellnaw",
     "world": "Firmera",
-    "experience": 15117483141,
-    "level": 970,
+    "experience": 15173948640,
+    "level": 971,
     "vocation": "Royal Paladin",
     "rank": 44,
-    "last_updated": "2026-10-30 04:27:56 UTC"
+    "last_updated": "2026-10-30 04:48:39 UTC"
   }
 }
