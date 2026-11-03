@@ -44,14 +44,14 @@
   const DATA_URL = "https://raw.githubusercontent.com/Ruslex1234/tibia-target-exp-tracker/main/frags.json";
   const selected = new URLSearchParams(location.search).get("char");
 
-  // Same layout as tibia.com ("Nov 03 2026, 04:00:00 EST"), in the viewer's own timezone.
+  // Same layout as tibia.com ("Nov 03 2026, 4:00:00 AM EST"), in the viewer's own timezone.
   const parts = new Intl.DateTimeFormat("en-US", {
     month: "short", day: "2-digit", year: "numeric",
-    hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23", timeZoneName: "short",
+    hour: "numeric", minute: "2-digit", second: "2-digit", hourCycle: "h12", timeZoneName: "short",
   });
   function tibiaDate(seconds) {
     const p = Object.fromEntries(parts.formatToParts(new Date(seconds * 1000)).map(x => [x.type, x.value]));
-    return `${p.month} ${p.day} ${p.year}, ${p.hour}:${p.minute}:${p.second} ${p.timeZoneName}`;
+    return `${p.month} ${p.day} ${p.year}, ${p.hour}:${p.minute}:${p.second} ${p.dayPeriod} ${p.timeZoneName}`;
   }
 
   function esc(s) {
