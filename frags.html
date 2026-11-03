@@ -28,6 +28,7 @@
   @media (max-width: 600px) {
     body { padding: 8px; font-size: 12px; }
     td.date { white-space: normal; width: 24%; }
+    th.nowrap { white-space: normal; width: auto; }
   }
 </style>
 </head>
@@ -79,40 +80,35 @@
   const fragCount = c => c.deaths.filter(d => d.frag).length;
 
   // Red skull thresholds (tibia.com): reaching the limit in any rolling window gives a red skull.
-  const LIMITS = [["24 hours", 86400, 3], ["7 days", 7 * 86400, 5], ["30 days", 30 * 86400, 10]];
+  const LIMITS = [["today", 86400, 3], ["this week", 7 * 86400, 5], ["this month", 30 * 86400, 10]];
   // Frags in each window, counted back from this moment.
   function windowCounts(c) {
     const now = Date.now() / 1000;
     const times = c.deaths.filter(d => d.frag).map(d => d.time_unix || Date.parse(d.time) / 1000);
     return LIMITS.map(([, seconds]) => times.filter(t => now - t < seconds).length);
   }
-  // Frags that can still be made without reaching any limit (so 2 per day at most).
+  // Frags left in each window before reaching its limit (so 2 per day at most).
   function fragsLeft(counts) {
-    return Math.max(0, Math.min(...LIMITS.map(([, , limit], i) => limit - 1 - counts[i])));
+    return LIMITS.map(([, , limit], i) => Math.max(0, limit - 1 - counts[i]));
   }
 
   function showIndex(data) {
     document.title = "Frag List";
     document.getElementById("caption").textContent = "Alert Characters - last 30 days";
     document.getElementById("head").innerHTML = `<tr><th>Name</th><th>World</th>` +
-      LIMITS.map(([label]) => `<th class="nowrap">${label}</th>`).join("") + `<th class="nowrap">Frags left</th></tr>`;
+      LIMITS.map(([label]) => `<th class="nowrap">Left ${label}</th>`).join("") + `</tr>`;
     document.getElementById("rows").innerHTML = data.characters.length
-      ? data.characters.map(c => {
-          const counts = windowCounts(c), left = fragsLeft(counts);
-          return `<tr><td>${subPage(c.killer)}</td><td>${esc(c.world)}</td>` +
-            counts.map((n, i) => `<td class="nowrap">${n} / ${LIMITS[i][2]}</td>`).join("") +
-            `<td class="nowrap${left === 0 ? " danger" : ""}">${left}</td></tr>`;
-        }).join("")
-      : `<tr><td colspan="6">No alert characters.</td></tr>`;
+      ? data.characters.map(c => `<tr><td>${subPage(c.killer)}</td><td>${esc(c.world)}</td>` +
+          fragsLeft(windowCounts(c)).map(n => `<td class="nowrap${n === 0 ? " danger" : ""}">${n}</td>`).join("") +
+          `</tr>`).join("")
+      : `<tr><td colspan="5">No alert characters.</td></tr>`;
   }
 
   function showCharacter(c) {
     document.title = `${c.killer} Frags`;
     document.getElementById("back").innerHTML = `<a class="back" href="?">« All alert characters</a>`;
-    const counts = windowCounts(c);
     document.getElementById("caption").textContent =
-      `${c.killer} (${c.world}) - frags: ${counts.map((n, i) => `${n}/${LIMITS[i][2]} in ${LIMITS[i][0]}`).join(", ")}` +
-      ` - ${fragsLeft(counts)} left`;
+      `${c.killer} (${c.world}) - frags left: ` + fragsLeft(windowCounts(c)).map((n, i) => `${n} ${LIMITS[i][0]}`).join(", ");
     document.getElementById("head").innerHTML = `<tr><th class="nowrap">Date</th><th>Character</th><th>Death</th><th class="nowrap">Frag</th></tr>`;
     document.getElementById("rows").innerHTML = c.deaths.length
       ? c.deaths.map(d => `<tr>
@@ -133,8 +129,8 @@
       c ? showCharacter(c) : showIndex(data);
       const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       document.getElementById("note").textContent =
-        `Frag = 1st or 2nd killer. Only trolls on the same world are checked. Red skull at 3 in 24 hours, ` +
-        `5 in 7 days or 10 in 30 days, counted back from now. Frags left = frags possible without reaching any of them. Times are in your timezone (${zone}). ` +
+        `Frag = 1st or 2nd killer. Only trolls on the same world are checked. Red skull at 3 frags in 24 hours, ` +
+        `5 in 7 days or 10 in 30 days; "left" is how many more fit in each, counted back from now. Times are in your timezone (${zone}). ` +
         `Last updated ${tibiaDate(Date.parse(data.updated_at) / 1000)}.`;
     })
     .catch(e => {
