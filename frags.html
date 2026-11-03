@@ -9,32 +9,39 @@
     margin: 0; padding: 16px; background: #fdf3e1; color: #000;
     font: 13px/1.4 Verdana, Arial, sans-serif;
   }
-  .box { max-width: 760px; margin: 0 auto; }
+  .box { max-width: 860px; margin: 0 auto; }
+  .back { display: inline-block; margin-bottom: 8px; }
   .caption {
     background: #5f4d41; color: #fff; font-weight: bold;
     padding: 5px 8px; border: 1px solid #5a2800; border-bottom: 0;
   }
   table { width: 100%; border-collapse: collapse; border: 1px solid #5a2800; }
-  td { padding: 4px 6px; vertical-align: top; border: 1px solid #faf0d7; }
-  tr:nth-child(odd) td { background: #f1e0c6; }
-  tr:nth-child(even) td { background: #d4c0a1; }
-  td.date, td.frag { white-space: nowrap; width: 1%; }
-  td.frag.yes { font-weight: bold; color: #8b0000; }
-  @media (max-width: 600px) { td.date { white-space: normal; width: 28%; } }
+  td, th { padding: 4px 6px; vertical-align: top; border: 1px solid #faf0d7; text-align: left; }
+  th { background: #d4c0a1; font-weight: bold; }
+  tbody tr:nth-child(odd) td { background: #f1e0c6; }
+  tbody tr:nth-child(even) td { background: #d4c0a1; }
+  .nowrap { white-space: nowrap; width: 1%; }
+  td.yes, .danger { font-weight: bold; color: #8b0000; }
   a { color: #004294; font-weight: bold; text-decoration: none; }
   a:hover { text-decoration: underline; }
   .note { margin-top: 6px; font-size: 11px; color: #5a4a3a; }
+  @media (max-width: 600px) {
+    body { padding: 8px; font-size: 12px; }
+    td.date { white-space: normal; width: 24%; }
+  }
 </style>
 </head>
 <body>
 <div class="box">
+  <div id="back"></div>
   <div class="caption" id="caption">Frag List</div>
-  <table><tbody id="rows"><tr><td>Loading…</td></tr></tbody></table>
+  <table><thead id="head"></thead><tbody id="rows"><tr><td>Loading…</td></tr></tbody></table>
   <div class="note" id="note"></div>
 </div>
 <script>
   // Read the latest data straight from the repo each time the page opens.
   const DATA_URL = "https://raw.githubusercontent.com/Ruslex1234/tibia-target-exp-tracker/main/frags.json";
+  const selected = new URLSearchParams(location.search).get("char");
 
   // Same layout as tibia.com ("Nov 03 2026, 04:00:00 EST"), in the viewer's own timezone.
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -53,35 +60,85 @@
     const url = "https://www.tibia.com/community/?subtopic=characters&name=" + encodeURIComponent(name);
     return `<a href="${url}" target="_blank" rel="noopener">${esc(name)}</a>`;
   }
+  function subPage(name) {
+    return `<a href="?char=${encodeURIComponent(name)}">${esc(name)}</a>`;
+  }
   // "Killed at Level 402 by Someone and Ohellnaw." with every player name linked.
   function describe(d) {
     let text = esc(d.reason || `Killed at Level ${d.victim_level}.`);
     const names = [...new Set([...(d.killers || []), ...(d.assists || [])].filter(k => k.player).map(k => k.name))]
       .sort((a, b) => b.length - a.length);
     for (const name of names) text = text.split(esc(name)).join(charLink(name));
-    return `${charLink(d.victim)}: ${text}`;
+    return text;
   }
-  // Frag = 1st or 2nd killer. Otherwise say where he showed up instead.
+  // Frag = 1st or 2nd killer. Otherwise say where they showed up instead.
   function fragCell(d) {
-    if (d.frag) return `<td class="frag yes">Yes (#${d.position})</td>`;
-    return `<td class="frag">No (${d.position ? "#" + d.position : "assist"})</td>`;
+    if (d.frag) return `<td class="nowrap yes">Yes (#${d.position})</td>`;
+    return `<td class="nowrap">No (${d.position ? "#" + d.position : "assist"})</td>`;
+  }
+  const fragCount = c => c.deaths.filter(d => d.frag).length;
+
+  // Red skull thresholds (tibia.com): reaching the limit in any rolling window gives a red skull.
+  const LIMITS = [["24 hours", 86400, 3], ["7 days", 7 * 86400, 5], ["30 days", 30 * 86400, 10]];
+  // Frags in each window, counted back from this moment.
+  function windowCounts(c) {
+    const now = Date.now() / 1000;
+    const times = c.deaths.filter(d => d.frag).map(d => d.time_unix || Date.parse(d.time) / 1000);
+    return LIMITS.map(([, seconds]) => times.filter(t => now - t < seconds).length);
+  }
+  // Frags that can still be made without reaching any limit (so 2 per day at most).
+  function fragsLeft(counts) {
+    return Math.max(0, Math.min(...LIMITS.map(([, , limit], i) => limit - 1 - counts[i])));
+  }
+
+  function showIndex(data) {
+    document.title = "Frag List";
+    document.getElementById("caption").textContent = "Alert Characters - last 30 days";
+    document.getElementById("head").innerHTML = `<tr><th>Name</th><th>World</th>` +
+      LIMITS.map(([label]) => `<th class="nowrap">${label}</th>`).join("") + `<th class="nowrap">Frags left</th></tr>`;
+    document.getElementById("rows").innerHTML = data.characters.length
+      ? data.characters.map(c => {
+          const counts = windowCounts(c), left = fragsLeft(counts);
+          return `<tr><td>${subPage(c.killer)}</td><td>${esc(c.world)}</td>` +
+            counts.map((n, i) => `<td class="nowrap">${n} / ${LIMITS[i][2]}</td>`).join("") +
+            `<td class="nowrap${left === 0 ? " danger" : ""}">${left}</td></tr>`;
+        }).join("")
+      : `<tr><td colspan="6">No alert characters.</td></tr>`;
+  }
+
+  function showCharacter(c) {
+    document.title = `${c.killer} Frags`;
+    document.getElementById("back").innerHTML = `<a class="back" href="?">« All alert characters</a>`;
+    const counts = windowCounts(c);
+    document.getElementById("caption").textContent =
+      `${c.killer} (${c.world}) - frags: ${counts.map((n, i) => `${n}/${LIMITS[i][2]} in ${LIMITS[i][0]}`).join(", ")}` +
+      ` - ${fragsLeft(counts)} left`;
+    document.getElementById("head").innerHTML = `<tr><th class="nowrap">Date</th><th>Character</th><th>Death</th><th class="nowrap">Frag</th></tr>`;
+    document.getElementById("rows").innerHTML = c.deaths.length
+      ? c.deaths.map(d => `<tr>
+          <td class="nowrap date">${esc(tibiaDate(d.time_unix || Date.parse(d.time) / 1000))}</td>
+          <td>${charLink(d.victim)}</td>
+          <td>${describe(d)}</td>
+          ${fragCell(d)}
+        </tr>`).join("")
+      : `<tr><td colspan="4">No troll deaths involving ${esc(c.killer)} in the last 30 days.</td></tr>`;
   }
 
   fetch(DATA_URL + "?t=" + Date.now(), { cache: "no-store" })
     .then(res => { if (!res.ok) throw new Error("HTTP " + res.status); return res.json(); })
     .then(data => {
-      const deaths = data.deaths || [];
-      const frags = deaths.filter(d => d.frag).length;
-      document.getElementById("caption").textContent =
-        `${data.killer} (${data.world}) - ${frags} frags in ${deaths.length} deaths, last 30 days`;
-      document.getElementById("rows").innerHTML = deaths.length
-        ? deaths.map(d => `<tr><td class="date">${esc(tibiaDate(d.time_unix || Date.parse(d.time) / 1000))}</td><td>${describe(d)}</td>${fragCell(d)}</tr>`).join("")
-        : `<tr><td>No deaths involving ${esc(data.killer)} in the last 30 days.</td></tr>`;
+      data.characters = data.characters || [];
+      const c = selected && data.characters.find(x => x.killer.toLowerCase() === selected.toLowerCase());
+      if (selected && !c) throw new Error(`${selected} is not on the alerts list`);
+      c ? showCharacter(c) : showIndex(data);
       const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       document.getElementById("note").textContent =
-        `Frag = 1st or 2nd killer. Times are in your timezone (${zone}). Last updated ${tibiaDate(Date.parse(data.updated_at) / 1000)}.`;
+        `Frag = 1st or 2nd killer. Only trolls on the same world are checked. Red skull at 3 in 24 hours, ` +
+        `5 in 7 days or 10 in 30 days, counted back from now. Frags left = frags possible without reaching any of them. Times are in your timezone (${zone}). ` +
+        `Last updated ${tibiaDate(Date.parse(data.updated_at) / 1000)}.`;
     })
     .catch(e => {
+      if (selected) document.getElementById("back").innerHTML = `<a class="back" href="?">« All alert characters</a>`;
       document.getElementById("rows").innerHTML = `<tr><td>Could not load the frag list (${esc(e.message)}).</td></tr>`;
     });
 </script>
