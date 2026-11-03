@@ -18,7 +18,9 @@
   td { padding: 4px 6px; vertical-align: top; border: 1px solid #faf0d7; }
   tr:nth-child(odd) td { background: #f1e0c6; }
   tr:nth-child(even) td { background: #d4c0a1; }
-  td.date { white-space: nowrap; width: 1%; }
+  td.date, td.frag { white-space: nowrap; width: 1%; }
+  td.frag.yes { font-weight: bold; color: #8b0000; }
+  @media (max-width: 600px) { td.date { white-space: normal; width: 28%; } }
   a { color: #004294; font-weight: bold; text-decoration: none; }
   a:hover { text-decoration: underline; }
   .note { margin-top: 6px; font-size: 11px; color: #5a4a3a; }
@@ -54,23 +56,30 @@
   // "Killed at Level 402 by Someone and Ohellnaw." with every player name linked.
   function describe(d) {
     let text = esc(d.reason || `Killed at Level ${d.victim_level}.`);
-    const names = [...new Set(d.killers || [])].sort((a, b) => b.length - a.length);
+    const names = [...new Set([...(d.killers || []), ...(d.assists || [])].filter(k => k.player).map(k => k.name))]
+      .sort((a, b) => b.length - a.length);
     for (const name of names) text = text.split(esc(name)).join(charLink(name));
     return `${charLink(d.victim)}: ${text}`;
+  }
+  // Frag = 1st or 2nd killer. Otherwise say where he showed up instead.
+  function fragCell(d) {
+    if (d.frag) return `<td class="frag yes">Yes (#${d.position})</td>`;
+    return `<td class="frag">No (${d.position ? "#" + d.position : "assist"})</td>`;
   }
 
   fetch(DATA_URL + "?t=" + Date.now(), { cache: "no-store" })
     .then(res => { if (!res.ok) throw new Error("HTTP " + res.status); return res.json(); })
     .then(data => {
       const deaths = data.deaths || [];
+      const frags = deaths.filter(d => d.frag).length;
       document.getElementById("caption").textContent =
-        `${data.killer} Frags (${data.world}) - ${deaths.length} in the last 30 days`;
+        `${data.killer} (${data.world}) - ${frags} frags in ${deaths.length} deaths, last 30 days`;
       document.getElementById("rows").innerHTML = deaths.length
-        ? deaths.map(d => `<tr><td class="date">${esc(tibiaDate(d.time_unix || Date.parse(d.time) / 1000))}</td><td>${describe(d)}</td></tr>`).join("")
-        : `<tr><td>No frags in the last 30 days.</td></tr>`;
+        ? deaths.map(d => `<tr><td class="date">${esc(tibiaDate(d.time_unix || Date.parse(d.time) / 1000))}</td><td>${describe(d)}</td>${fragCell(d)}</tr>`).join("")
+        : `<tr><td>No deaths involving ${esc(data.killer)} in the last 30 days.</td></tr>`;
       const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       document.getElementById("note").textContent =
-        `Times are in your timezone (${zone}). Last updated ${tibiaDate(Date.parse(data.updated_at) / 1000)}.`;
+        `Frag = 1st or 2nd killer. Times are in your timezone (${zone}). Last updated ${tibiaDate(Date.parse(data.updated_at) / 1000)}.`;
     })
     .catch(e => {
       document.getElementById("rows").innerHTML = `<tr><td>Could not load the frag list (${esc(e.message)}).</td></tr>`;
