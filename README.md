@@ -92,7 +92,7 @@ Each run rebuilds `frags.json` from scratch, with one list per character in `ale
 }
 ```
 
-`frags.html` shows this in the style of tibia.com's tables, with every time converted to the viewer's own timezone. Opened as is, it lists every alert character with their frag and death counts; each name opens that character's sub page (`frags.html?char=Ohellnaw`) with Date, Character, Death and Frag columns. It loads `frags.json` from the repo each time it opens, so it never needs rebuilding. Serve it with GitHub Pages (Settings, Pages, deploy from `main`, root).
+`frags.html` shows this in the style of tibia.com's tables, with every time converted to the viewer's own timezone. Opened as is, it lists every alert character with their frags in the last 24 hours, 7 days and 30 days against the black skull limits (6, 10 and 20), counted back from the moment the page is opened, and how many frags are left before the first limit is reached; each name opens that character's sub page (`frags.html?char=Ohellnaw`) with Date, Character, Death and Frag columns. It loads `frags.json` from the repo each time it opens, so it never needs rebuilding. Serve it with GitHub Pages (Settings, Pages, deploy from `main`, root).
 
 ### Highscore Lookup
 

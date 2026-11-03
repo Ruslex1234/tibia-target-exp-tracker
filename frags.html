@@ -21,7 +21,7 @@
   tbody tr:nth-child(odd) td { background: #f1e0c6; }
   tbody tr:nth-child(even) td { background: #d4c0a1; }
   .nowrap { white-space: nowrap; width: 1%; }
-  td.yes { font-weight: bold; color: #8b0000; }
+  td.yes, .danger { font-weight: bold; color: #8b0000; }
   a { color: #004294; font-weight: bold; text-decoration: none; }
   a:hover { text-decoration: underline; }
   .note { margin-top: 6px; font-size: 11px; color: #5a4a3a; }
@@ -78,21 +78,41 @@
   }
   const fragCount = c => c.deaths.filter(d => d.frag).length;
 
+  // Black skull thresholds (tibia.com): frags allowed per rolling window.
+  const LIMITS = [["24 hours", 86400, 6], ["7 days", 7 * 86400, 10], ["30 days", 30 * 86400, 20]];
+  // Frags in each window, counted back from this moment.
+  function windowCounts(c) {
+    const now = Date.now() / 1000;
+    const times = c.deaths.filter(d => d.frag).map(d => d.time_unix || Date.parse(d.time) / 1000);
+    return LIMITS.map(([, seconds]) => times.filter(t => now - t < seconds).length);
+  }
+  // How many more frags before any window reaches its limit.
+  function fragsLeft(counts) {
+    return Math.max(0, Math.min(...LIMITS.map(([, , limit], i) => limit - counts[i])));
+  }
+
   function showIndex(data) {
     document.title = "Frag List";
     document.getElementById("caption").textContent = "Alert Characters - last 30 days";
-    document.getElementById("head").innerHTML = `<tr><th>Name</th><th>World</th><th class="nowrap">Frags</th><th class="nowrap">Deaths involved</th></tr>`;
+    document.getElementById("head").innerHTML = `<tr><th>Name</th><th>World</th>` +
+      LIMITS.map(([label]) => `<th class="nowrap">${label}</th>`).join("") + `<th class="nowrap">Frags left</th></tr>`;
     document.getElementById("rows").innerHTML = data.characters.length
-      ? data.characters.map(c => `<tr><td>${subPage(c.killer)}</td><td>${esc(c.world)}</td>
-          <td class="nowrap">${fragCount(c)}</td><td class="nowrap">${c.deaths.length}</td></tr>`).join("")
-      : `<tr><td colspan="4">No alert characters.</td></tr>`;
+      ? data.characters.map(c => {
+          const counts = windowCounts(c), left = fragsLeft(counts);
+          return `<tr><td>${subPage(c.killer)}</td><td>${esc(c.world)}</td>` +
+            counts.map((n, i) => `<td class="nowrap${n >= LIMITS[i][2] ? " danger" : ""}">${n} / ${LIMITS[i][2]}</td>`).join("") +
+            `<td class="nowrap${left <= 1 ? " danger" : ""}">${left === 0 ? "Black skull" : left}</td></tr>`;
+        }).join("")
+      : `<tr><td colspan="6">No alert characters.</td></tr>`;
   }
 
   function showCharacter(c) {
     document.title = `${c.killer} Frags`;
     document.getElementById("back").innerHTML = `<a class="back" href="?">« All alert characters</a>`;
+    const counts = windowCounts(c);
     document.getElementById("caption").textContent =
-      `${c.killer} (${c.world}) - ${fragCount(c)} frags in ${c.deaths.length} deaths, last 30 days`;
+      `${c.killer} (${c.world}) - frags: ${counts.map((n, i) => `${n}/${LIMITS[i][2]} in ${LIMITS[i][0]}`).join(", ")}` +
+      ` - ${fragsLeft(counts)} left`;
     document.getElementById("head").innerHTML = `<tr><th class="nowrap">Date</th><th>Character</th><th>Death</th><th class="nowrap">Frag</th></tr>`;
     document.getElementById("rows").innerHTML = c.deaths.length
       ? c.deaths.map(d => `<tr>
@@ -113,7 +133,8 @@
       c ? showCharacter(c) : showIndex(data);
       const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       document.getElementById("note").textContent =
-        `Frag = 1st or 2nd killer. Only trolls on the same world are checked. Times are in your timezone (${zone}). ` +
+        `Frag = 1st or 2nd killer. Only trolls on the same world are checked. Limits are black skull: 6 in 24 hours, ` +
+        `10 in 7 days, 20 in 30 days, counted back from now. Times are in your timezone (${zone}). ` +
         `Last updated ${tibiaDate(Date.parse(data.updated_at) / 1000)}.`;
     })
     .catch(e => {
