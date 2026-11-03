@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frag List</title>
+<style>
+  body {
+    margin: 0; padding: 16px; background: #fdf3e1; color: #000;
+    font: 13px/1.4 Verdana, Arial, sans-serif;
+  }
+  .box { max-width: 760px; margin: 0 auto; }
+  .caption {
+    background: #5f4d41; color: #fff; font-weight: bold;
+    padding: 5px 8px; border: 1px solid #5a2800; border-bottom: 0;
+  }
+  table { width: 100%; border-collapse: collapse; border: 1px solid #5a2800; }
+  td { padding: 4px 6px; vertical-align: top; border: 1px solid #faf0d7; }
+  tr:nth-child(odd) td { background: #f1e0c6; }
+  tr:nth-child(even) td { background: #d4c0a1; }
+  td.date, td.frag { white-space: nowrap; width: 1%; }
+  td.frag.yes { font-weight: bold; color: #8b0000; }
+  @media (max-width: 600px) { td.date { white-space: normal; width: 28%; } }
+  a { color: #004294; font-weight: bold; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .note { margin-top: 6px; font-size: 11px; color: #5a4a3a; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="caption" id="caption">Frag List</div>
+  <table><tbody id="rows"><tr><td>Loading…</td></tr></tbody></table>
+  <div class="note" id="note"></div>
+</div>
+<script>
+  // Read the latest data straight from the repo each time the page opens.
+  const DATA_URL = "https://raw.githubusercontent.com/Ruslex1234/tibia-target-exp-tracker/main/frags.json";
+
+  // Same layout as tibia.com ("Nov 03 2026, 04:00:00 EST"), in the viewer's own timezone.
+  const parts = new Intl.DateTimeFormat("en-US", {
+    month: "short", day: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23", timeZoneName: "short",
+  });
+  function tibiaDate(seconds) {
+    const p = Object.fromEntries(parts.formatToParts(new Date(seconds * 1000)).map(x => [x.type, x.value]));
+    return `${p.month} ${p.day} ${p.year}, ${p.hour}:${p.minute}:${p.second} ${p.timeZoneName}`;
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  }
+  function charLink(name) {
+    const url = "https://www.tibia.com/community/?subtopic=characters&name=" + encodeURIComponent(name);
+    return `<a href="${url}" target="_blank" rel="noopener">${esc(name)}</a>`;
+  }
+  // "Killed at Level 402 by Someone and Ohellnaw." with every player name linked.
+  function describe(d) {
+    let text = esc(d.reason || `Killed at Level ${d.victim_level}.`);
+    const names = [...new Set([...(d.killers || []), ...(d.assists || [])].filter(k => k.player).map(k => k.name))]
+      .sort((a, b) => b.length - a.length);
+    for (const name of names) text = text.split(esc(name)).join(charLink(name));
+    return `${charLink(d.victim)}: ${text}`;
+  }
+  // Frag = 1st or 2nd killer. Otherwise say where he showed up instead.
+  function fragCell(d) {
+    if (d.frag) return `<td class="frag yes">Yes (#${d.position})</td>`;
+    return `<td class="frag">No (${d.position ? "#" + d.position : "assist"})</td>`;
+  }
+
+  fetch(DATA_URL + "?t=" + Date.now(), { cache: "no-store" })
+    .then(res => { if (!res.ok) throw new Error("HTTP " + res.status); return res.json(); })
+    .then(data => {
+      const deaths = data.deaths || [];
+      const frags = deaths.filter(d => d.frag).length;
+      document.getElementById("caption").textContent =
+        `${data.killer} (${data.world}) - ${frags} frags in ${deaths.length} deaths, last 30 days`;
+      document.getElementById("rows").innerHTML = deaths.length
+        ? deaths.map(d => `<tr><td class="date">${esc(tibiaDate(d.time_unix || Date.parse(d.time) / 1000))}</td><td>${describe(d)}</td>${fragCell(d)}</tr>`).join("")
+        : `<tr><td>No deaths involving ${esc(data.killer)} in the last 30 days.</td></tr>`;
+      const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      document.getElementById("note").textContent =
+        `Frag = 1st or 2nd killer. Times are in your timezone (${zone}). Last updated ${tibiaDate(Date.parse(data.updated_at) / 1000)}.`;
+    })
+    .catch(e => {
+      document.getElementById("rows").innerHTML = `<tr><td>Could not load the frag list (${esc(e.message)}).</td></tr>`;
+    });
+</script>
+</body>
+</html>

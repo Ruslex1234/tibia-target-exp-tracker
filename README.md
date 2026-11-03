@@ -57,6 +57,39 @@ https://raw.githubusercontent.com/Ruslex1234/tibia-ops-config/refs/heads/main/.c
 - Duplicate names are ignored; characters not on their world's highscores are skipped
 - If `trolls.json` can't be fetched, alerts still run normally
 
+### Frag List
+
+Each run rebuilds `frags.json` from scratch: every death from the last 30 days (what tibia.com keeps) of a troll on Ohellnaw's world where **Ohellnaw appears as a killer or an assist**. A death is marked `"frag": true` only when Ohellnaw is the **1st or 2nd killer**; lower killer positions and assists are listed but don't count. Deaths that age out on tibia.com disappear from the list on the next run. The character is set by `FRAG_KILLER` in `track_exp.py`.
+
+- No extra API requests: it reuses the character pages already fetched for exp tracking
+- If a troll's page fails to load, that troll keeps its previous entries; if Ohellnaw can't be looked up, the file is left untouched
+- `position` is Ohellnaw's place in the killers list (`null` if he only assisted); `assist` says whether he is in the assists list
+- Times are UTC in two forms: `time` (ISO 8601) and `time_unix` (seconds), newest first
+
+```json
+{
+  "killer": "Ohellnaw",
+  "world": "Firmera",
+  "updated_at": "2026-11-03T17:07:40Z",
+  "deaths": [
+    {
+      "victim": "Some Troll",
+      "victim_level": 402,
+      "frag": true,
+      "position": 2,
+      "assist": false,
+      "time": "2026-11-03T09:00:00Z",
+      "time_unix": 1793696400,
+      "killers": [{"name": "Someone", "player": true}, {"name": "Ohellnaw", "player": true}],
+      "assists": [],
+      "reason": "Killed at Level 402 by Someone and Ohellnaw."
+    }
+  ]
+}
+```
+
+`frags.html` shows the list in the style of tibia.com's Character Deaths table, with a column saying whether each death is a frag and every time converted to the viewer's own timezone. It loads `frags.json` from the repo each time it opens, so it never needs rebuilding. Serve it with GitHub Pages (Settings, Pages, deploy from `main`, root) and open `/frags.html`.
+
 ### Highscore Lookup
 
 Each character's world comes from the character API, then the tracker finds them in that world's experience highscores (top 1000). Pages are cached per world, so each page is downloaded at most once per run no matter how many tracked characters share a world. If a lookup fails, the last known data is kept instead of being dropped.
@@ -83,6 +116,9 @@ The Discord webhook URL must be configured as a repository secret:
 
 - **`track_exp.py`**: Main Python script that handles tracking
 - **`exp.json`**: JSON file storing current experience data for all tracked characters
+- **`trolls_exp.json`**: Experience data for the troll list
+- **`frags.json`**: Troll deaths (last 30 days) involving Ohellnaw, with frags (1st or 2nd killer) marked
+- **`frags.html`**: Page that shows `frags.json` in the viewer's local time
 - **`.github/workflows/track-exp.yml`**: GitHub Actions workflow configuration
 
 ## Workflow Schedule

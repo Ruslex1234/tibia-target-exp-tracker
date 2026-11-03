@@ -3,7 +3,9 @@
 Tibia Experience Tracker
 Tracks player experience from TibiaData API and sends Discord notifications on changes.
 Two lists are tracked: alerts (one message per character to WEBHOOK) and trolls
-(one summary message per run to WEBHOOK_TROLL).
+(one summary message per run to WEBHOOK_TROLL). frags.json mirrors the troll
+deaths from the last 30 days where FRAG_KILLER appears as a killer or assist;
+those with FRAG_KILLER as 1st or 2nd killer are marked as frags.
 """
 
 import json
@@ -13,6 +15,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 from pathlib import Path
 
@@ -24,6 +27,8 @@ TROLLS_URL = f"{CONFIG_BASE_URL}/trolls.json"
 TIBIADATA_API_BASE = "https://api.tibiadata.com/v5"
 EXP_JSON_PATH = "exp.json"
 TROLLS_EXP_JSON_PATH = "trolls_exp.json"
+FRAGS_JSON_PATH = "frags.json"
+FRAG_KILLER = "Ohellnaw"
 DISCORD_WEBHOOK_URL = os.environ.get("WEBHOOK", "")
 TROLL_WEBHOOK_URL = os.environ.get("WEBHOOK_TROLL", "")
 HEADERS = {
@@ -83,6 +88,10 @@ def fetch_player_list(url: str, label: str) -> Optional[List[str]]:
         return None
 
 
+# lower requested name -> TibiaData "character" object (character info + deaths).
+# Filled by get_character_info so the frag list needs no extra requests.
+_character_cache: Dict = {}
+
 # world -> {"entries": {lower name: entry}, "next_page": int, "total_pages": int|None}
 # Shared by every list so a world's pages are fetched at most once per run.
 _highscore_cache: Dict = {}
@@ -93,6 +102,7 @@ def get_character_info(character_name: str) -> Optional[Dict]:
     try:
         encoded_name = urllib.parse.quote(character_name)
         data = http_json(f"{TIBIADATA_API_BASE}/character/{encoded_name}")
+        _character_cache[character_name.lower()] = (data or {}).get("character", {})
         character = (data or {}).get("character", {}).get("character", {})
         world = character.get("world")
         if not world:
@@ -191,6 +201,70 @@ def save_exp_data(data: Dict, path: str):
     except Exception as e:
         print(f"✗ Error saving {path}: {e}")
         sys.exit(1)
+
+
+def iso_to_unix(value: str) -> Optional[int]:
+    """'2026-11-01T10:00:00Z' -> 1761991200, None if unparseable."""
+    try:
+        return int(datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp())
+    except (AttributeError, ValueError):
+        return None
+
+
+def build_frag_list(trolls: List[str], previous: Dict) -> Optional[Dict]:
+    """Rebuild the frag list from scratch, mirroring tibia.com's 30 day deaths.
+
+    Lists every death of a troll on FRAG_KILLER's world where FRAG_KILLER
+    appears as a killer or an assist. A death is marked "frag" only when
+    FRAG_KILLER is the 1st or 2nd entry in the killers list. Uses the character pages already fetched this run. A troll whose
+    page failed to load keeps its entries from the previous list, so an API
+    hiccup can't wipe real deaths. Returns None if FRAG_KILLER can't be
+    looked up, in which case the previous list should be kept as is.
+    """
+    if FRAG_KILLER.lower() not in _character_cache:
+        get_character_info(FRAG_KILLER)
+    killer = _character_cache.get(FRAG_KILLER.lower(), {}).get("character") or {}
+    if not killer.get("world"):
+        return None
+    killer_name, world = killer["name"], killer["world"]
+
+    deaths, failed = [], set()
+    for troll in trolls:
+        if troll.lower() not in _character_cache:
+            failed.add(troll.lower())
+            continue
+        cached = _character_cache[troll.lower()]
+        victim = cached.get("character") or {}
+        if victim.get("world") != world:
+            continue
+        for death in cached.get("deaths") or []:
+            killers = death.get("killers") or []
+            assists = death.get("assists") or []
+            is_killer = lambda k: k.get("player") and (k.get("name") or "").lower() == killer_name.lower()
+            position = next((i for i, k in enumerate(killers, start=1) if is_killer(k)), None)
+            assist = any(is_killer(k) for k in assists)
+            if position or assist:
+                deaths.append({
+                    "victim": victim["name"],
+                    "victim_level": death.get("level", 0),
+                    "frag": position in (1, 2),
+                    "position": position,
+                    "assist": assist,
+                    "time": death.get("time", ""),
+                    "time_unix": iso_to_unix(death.get("time", "")),
+                    "killers": [{"name": k.get("name", ""), "player": bool(k.get("player"))} for k in killers],
+                    "assists": [{"name": k.get("name", ""), "player": bool(k.get("player"))} for k in assists],
+                    "reason": death.get("reason", ""),
+                })
+
+    deaths += [d for d in previous.get("deaths", []) if d.get("victim", "").lower() in failed]
+    deaths.sort(key=lambda d: d.get("time_unix") or 0, reverse=True)
+    return {
+        "killer": killer_name,
+        "world": world,
+        "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "deaths": deaths,
+    }
 
 
 def character_link(name: str) -> str:
@@ -477,6 +551,17 @@ def main():
             print(f"\nSending troll summary for {len(troll_changes)} change(s)")
             send_troll_summary(troll_changes)
 
+    # ---- Frags: rebuilt every run from the trolls' current death lists ----
+    frag_list = None
+    if trolls is not None:
+        frag_list = build_frag_list(trolls, load_exp_data(FRAGS_JSON_PATH))
+        if frag_list is None:
+            print(f"\n⚠ Could not look up {FRAG_KILLER}, keeping the previous frag list")
+        else:
+            frags = sum(d["frag"] for d in frag_list["deaths"])
+            print(f"\n⚔ {len(frag_list['deaths'])} troll death(s) involving {frag_list['killer']}, {frags} frag(s)")
+            save_exp_data(frag_list, FRAGS_JSON_PATH)
+
     print(f"\n{'=' * 60}")
     print(f"✓ Tracking complete!")
     print(f"  Alert characters tracked: {len(updated_data)}")
@@ -486,6 +571,8 @@ def main():
     if trolls is not None:
         print(f"  Troll characters tracked: {len(troll_updated)} of {len(trolls)}")
         print(f"  Troll experience changes: {len(troll_changes)}")
+        if frag_list is not None:
+            print(f"  Frags for {frag_list['killer']}: {sum(d['frag'] for d in frag_list['deaths'])} of {len(frag_list['deaths'])} deaths involved")
     print("=" * 60)
 
 
