@@ -59,10 +59,32 @@ https://raw.githubusercontent.com/Ruslex1234/tibia-ops-config/refs/heads/main/.c
 
 ### Frag List
 
-Each run also checks the death list of every troll that plays on the same world as an alert character. A death is recorded in `frags.json` when an alert character is the **1st or 2nd killer**; assists and lower killer positions don't count. The character pages are the ones already fetched for exp tracking, so this adds no API requests.
+Each run rebuilds `frags.json` from scratch: every death from the last 30 days (what tibia.com keeps) of a troll on Ohellnaw's world where **Ohellnaw is the 1st or 2nd killer**. Assists and lower killer positions don't count. Deaths that age out on tibia.com disappear from the list on the next run. The killer is set by `FRAG_KILLER` in `track_exp.py`.
 
-- Records are kept permanently (tibia.com only shows the last 30 days) and never duplicated
-- Each record has `killer`, `position` (1 or 2), `victim`, `victim_level`, `world`, `time` and the full death `reason`, newest first
+- No extra API requests: it reuses the character pages already fetched for exp tracking
+- If a troll's page fails to load, that troll keeps its previous entries; if Ohellnaw can't be looked up, the file is left untouched
+- Times are UTC in two forms: `time` (ISO 8601) and `time_unix` (seconds), newest first
+
+```json
+{
+  "killer": "Ohellnaw",
+  "world": "Firmera",
+  "updated_at": "2026-11-03T17:07:40Z",
+  "deaths": [
+    {
+      "victim": "Some Troll",
+      "victim_level": 402,
+      "position": 2,
+      "time": "2026-11-03T09:00:00Z",
+      "time_unix": 1793696400,
+      "killers": ["Someone", "Ohellnaw"],
+      "reason": "Killed at Level 402 by Someone and Ohellnaw."
+    }
+  ]
+}
+```
+
+`frags.html` shows the list as a table with every time converted to the viewer's own timezone. It loads `frags.json` from the repo each time it opens, so it never needs rebuilding. Serve it with GitHub Pages (Settings, Pages, deploy from `main`, root) and open `/frags.html`.
 
 ### Highscore Lookup
 
@@ -91,7 +113,8 @@ The Discord webhook URL must be configured as a repository secret:
 - **`track_exp.py`**: Main Python script that handles tracking
 - **`exp.json`**: JSON file storing current experience data for all tracked characters
 - **`trolls_exp.json`**: Experience data for the troll list
-- **`frags.json`**: Troll deaths where an alert character was the 1st or 2nd killer
+- **`frags.json`**: Troll deaths (last 30 days) where Ohellnaw was the 1st or 2nd killer
+- **`frags.html`**: Page that shows `frags.json` in the viewer's local time
 - **`.github/workflows/track-exp.yml`**: GitHub Actions workflow configuration
 
 ## Workflow Schedule
