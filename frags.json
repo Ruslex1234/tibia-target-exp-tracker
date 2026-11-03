@@ -1,0 +1,598 @@
+{
+  "killer": "Ohellnaw",
+  "world": "Firmera",
+  "updated_at": "2026-11-03T17:29:52Z",
+  "deaths": [
+    {
+      "victim": "Amm Sky",
+      "victim_level": 374,
+      "frag": true,
+      "position": 2,
+      "assist": false,
+      "time": "2026-11-03T12:46:09Z",
+      "time_unix": 1793709969,
+      "killers": [
+        {
+          "name": "Amm Sky",
+          "player": true
+        },
+        {
+          "name": "Ohellnaw",
+          "player": true
+        },
+        {
+          "name": "spellreaper inferniarch",
+          "player": false
+        }
+      ],
+      "assists": [
+        {
+          "name": "Shallteear",
+          "player": true
+        }
+      ],
+      "reason": "Killed at Level 374 by Amm Sky, Ohellnaw and spellreaper inferniarch. Assisted by Shallteear."
+    },
+    {
+      "victim": "Curly Moe",
+      "victim_level": 384,
+      "frag": false,
+      "position": null,
+      "assist": true,
+      "time": "2026-11-03T12:32:34Z",
+      "time_unix": 1793709154,
+      "killers": [
+        {
+          "name": "Curly Moe",
+          "player": true
+        },
+        {
+          "name": "brinebrute inferniarch",
+          "player": false
+        }
+      ],
+      "assists": [
+        {
+          "name": "Shallteear",
+          "player": true
+        },
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "reason": "Killed at Level 384 by Curly Moe and brinebrute inferniarch. Assisted by Shallteear and Ohellnaw."
+    },
+    {
+      "victim": "El Marino Loko",
+      "victim_level": 385,
+      "frag": false,
+      "position": null,
+      "assist": true,
+      "time": "2026-11-02T01:42:46Z",
+      "time_unix": 1793583766,
+      "killers": [
+        {
+          "name": "Siophrenic",
+          "player": true
+        }
+      ],
+      "assists": [
+        {
+          "name": "Dillon Duenodefirmera",
+          "player": true
+        },
+        {
+          "name": "Retrorandom Guy Dillon",
+          "player": true
+        },
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "reason": "Killed at Level 385 by Siophrenic. Assisted by Dillon Duenodefirmera, Retrorandom Guy Dillon and Ohellnaw."
+    },
+    {
+      "victim": "El Marino Loko",
+      "victim_level": 386,
+      "frag": false,
+      "position": null,
+      "assist": true,
+      "time": "2026-11-02T01:01:46Z",
+      "time_unix": 1793581306,
+      "killers": [
+        {
+          "name": "orclops bloodbreaker",
+          "player": false
+        }
+      ],
+      "assists": [
+        {
+          "name": "Dillon Duenodefirmera",
+          "player": true
+        },
+        {
+          "name": "Siophrenic",
+          "player": true
+        },
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "reason": "Died at Level 386 by orclops bloodbreaker. Assisted by Dillon Duenodefirmera, Siophrenic and Ohellnaw."
+    },
+    {
+      "victim": "Biguuzn",
+      "victim_level": 438,
+      "frag": true,
+      "position": 2,
+      "assist": false,
+      "time": "2026-11-02T01:00:58Z",
+      "time_unix": 1793581258,
+      "killers": [
+        {
+          "name": "Dillon Duenodefirmera",
+          "player": true
+        },
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "assists": [
+        {
+          "name": "Siophrenic",
+          "player": true
+        }
+      ],
+      "reason": "Killed at Level 438 by Dillon Duenodefirmera and Ohellnaw. Assisted by Siophrenic."
+    },
+    {
+      "victim": "El Marino Loko",
+      "victim_level": 387,
+      "frag": false,
+      "position": null,
+      "assist": true,
+      "time": "2026-11-02T00:35:09Z",
+      "time_unix": 1793579709,
+      "killers": [
+        {
+          "name": "Siophrenic",
+          "player": true
+        }
+      ],
+      "assists": [
+        {
+          "name": "Dillon Duenodefirmera",
+          "player": true
+        },
+        {
+          "name": "Retrorandom Guy Dillon",
+          "player": true
+        },
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "reason": "Killed at Level 387 by Siophrenic. Assisted by Dillon Duenodefirmera, Retrorandom Guy Dillon and Ohellnaw."
+    },
+    {
+      "victim": "El Marino Loko",
+      "victim_level": 388,
+      "frag": false,
+      "position": null,
+      "assist": true,
+      "time": "2026-11-02T00:13:05Z",
+      "time_unix": 1793578385,
+      "killers": [
+        {
+          "name": "orclops bloodbreaker",
+          "player": false
+        }
+      ],
+      "assists": [
+        {
+          "name": "Dillon Duenodefirmera",
+          "player": true
+        },
+        {
+          "name": "Retrorandom Guy Dillon",
+          "player": true
+        },
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "reason": "Died at Level 388 by orclops bloodbreaker. Assisted by Dillon Duenodefirmera, Retrorandom Guy Dillon and Ohellnaw."
+    },
+    {
+      "victim": "Rodryk Style",
+      "victim_level": 478,
+      "frag": true,
+      "position": 1,
+      "assist": false,
+      "time": "2026-10-31T06:51:30Z",
+      "time_unix": 1793429490,
+      "killers": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        },
+        {
+          "name": "grimeleech",
+          "player": false
+        }
+      ],
+      "assists": [],
+      "reason": "Killed at Level 478 by Ohellnaw and grimeleech."
+    },
+    {
+      "victim": "Rodryk Style",
+      "victim_level": 479,
+      "frag": true,
+      "position": 1,
+      "assist": false,
+      "time": "2026-10-27T02:34:51Z",
+      "time_unix": 1793068491,
+      "killers": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        },
+        {
+          "name": "retching horror",
+          "player": false
+        }
+      ],
+      "assists": [],
+      "reason": "Killed at Level 479 by Ohellnaw and retching horror."
+    },
+    {
+      "victim": "El Marino Loko",
+      "victim_level": 390,
+      "frag": true,
+      "position": 1,
+      "assist": false,
+      "time": "2026-10-22T20:45:40Z",
+      "time_unix": 1792701940,
+      "killers": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        },
+        {
+          "name": "gloom maw",
+          "player": false
+        }
+      ],
+      "assists": [],
+      "reason": "Killed at Level 390 by Ohellnaw and gloom maw."
+    },
+    {
+      "victim": "El Marino Loko",
+      "victim_level": 390,
+      "frag": false,
+      "position": null,
+      "assist": true,
+      "time": "2026-10-22T18:09:02Z",
+      "time_unix": 1792692542,
+      "killers": [
+        {
+          "name": "gloom maw",
+          "player": false
+        }
+      ],
+      "assists": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "reason": "Died at Level 390 by gloom maw. Assisted by Ohellnaw."
+    },
+    {
+      "victim": "El Marino Loko",
+      "victim_level": 391,
+      "frag": true,
+      "position": 1,
+      "assist": false,
+      "time": "2026-10-22T17:59:42Z",
+      "time_unix": 1792691982,
+      "killers": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        },
+        {
+          "name": "gloom maw",
+          "player": false
+        }
+      ],
+      "assists": [],
+      "reason": "Killed at Level 391 by Ohellnaw and gloom maw."
+    },
+    {
+      "victim": "El Marino Loko",
+      "victim_level": 392,
+      "frag": false,
+      "position": null,
+      "assist": true,
+      "time": "2026-10-22T17:53:35Z",
+      "time_unix": 1792691615,
+      "killers": [
+        {
+          "name": "norcferatu nightweaver",
+          "player": false
+        }
+      ],
+      "assists": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "reason": "Died at Level 392 by norcferatu nightweaver. Assisted by Ohellnaw."
+    },
+    {
+      "victim": "Rodryk Style",
+      "victim_level": 479,
+      "frag": true,
+      "position": 1,
+      "assist": false,
+      "time": "2026-10-16T23:50:10Z",
+      "time_unix": 1792194610,
+      "killers": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        },
+        {
+          "name": "hellflayer",
+          "player": false
+        }
+      ],
+      "assists": [],
+      "reason": "Killed at Level 479 by Ohellnaw and hellflayer."
+    },
+    {
+      "victim": "Amm Sky",
+      "victim_level": 376,
+      "frag": false,
+      "position": null,
+      "assist": true,
+      "time": "2026-10-16T23:18:40Z",
+      "time_unix": 1792192720,
+      "killers": [
+        {
+          "name": "Amm Sky",
+          "player": true
+        },
+        {
+          "name": "hellflayer",
+          "player": false
+        }
+      ],
+      "assists": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "reason": "Killed at Level 376 by Amm Sky and hellflayer. Assisted by Ohellnaw."
+    },
+    {
+      "victim": "Amm Sky",
+      "victim_level": 379,
+      "frag": true,
+      "position": 1,
+      "assist": false,
+      "time": "2026-10-14T00:13:11Z",
+      "time_unix": 1791936791,
+      "killers": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        },
+        {
+          "name": "blightwalker",
+          "player": false
+        }
+      ],
+      "assists": [],
+      "reason": "Killed at Level 379 by Ohellnaw and blightwalker."
+    },
+    {
+      "victim": "Amm Sky",
+      "victim_level": 382,
+      "frag": false,
+      "position": null,
+      "assist": true,
+      "time": "2026-10-13T04:31:24Z",
+      "time_unix": 1791865884,
+      "killers": [
+        {
+          "name": "Amm Sky",
+          "player": true
+        },
+        {
+          "name": "hellflayer",
+          "player": false
+        }
+      ],
+      "assists": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "reason": "Killed at Level 382 by Amm Sky and hellflayer. Assisted by Ohellnaw."
+    },
+    {
+      "victim": "Vian Chinan",
+      "victim_level": 344,
+      "frag": true,
+      "position": 1,
+      "assist": false,
+      "time": "2026-10-12T00:57:57Z",
+      "time_unix": 1791766677,
+      "killers": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        },
+        {
+          "name": "raubritter marksman",
+          "player": false
+        }
+      ],
+      "assists": [],
+      "reason": "Killed at Level 344 by Ohellnaw and raubritter marksman."
+    },
+    {
+      "victim": "Amm Sky",
+      "victim_level": 384,
+      "frag": false,
+      "position": null,
+      "assist": true,
+      "time": "2026-10-11T18:52:44Z",
+      "time_unix": 1791744764,
+      "killers": [
+        {
+          "name": "Amm Sky",
+          "player": true
+        },
+        {
+          "name": "vexclaw",
+          "player": false
+        }
+      ],
+      "assists": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "reason": "Killed at Level 384 by Amm Sky and vexclaw. Assisted by Ohellnaw."
+    },
+    {
+      "victim": "Vian Chinan",
+      "victim_level": 345,
+      "frag": false,
+      "position": null,
+      "assist": true,
+      "time": "2026-10-09T13:53:42Z",
+      "time_unix": 1791554022,
+      "killers": [
+        {
+          "name": "raubritter chastener",
+          "player": false
+        }
+      ],
+      "assists": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "reason": "Died at Level 345 by raubritter chastener. Assisted by Ohellnaw."
+    },
+    {
+      "victim": "Amm Sky",
+      "victim_level": 385,
+      "frag": true,
+      "position": 1,
+      "assist": false,
+      "time": "2026-10-09T03:02:59Z",
+      "time_unix": 1791514979,
+      "killers": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        },
+        {
+          "name": "dark torturer",
+          "player": false
+        }
+      ],
+      "assists": [],
+      "reason": "Killed at Level 385 by Ohellnaw and dark torturer."
+    },
+    {
+      "victim": "Amm Sky",
+      "victim_level": 385,
+      "frag": false,
+      "position": null,
+      "assist": true,
+      "time": "2026-10-09T02:40:12Z",
+      "time_unix": 1791513612,
+      "killers": [
+        {
+          "name": "grimeleech",
+          "player": false
+        }
+      ],
+      "assists": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "reason": "Died at Level 385 by grimeleech. Assisted by Ohellnaw."
+    },
+    {
+      "victim": "Amm Sky",
+      "victim_level": 388,
+      "frag": true,
+      "position": 2,
+      "assist": false,
+      "time": "2026-10-08T03:15:37Z",
+      "time_unix": 1791429337,
+      "killers": [
+        {
+          "name": "Amm Sky",
+          "player": true
+        },
+        {
+          "name": "Ohellnaw",
+          "player": true
+        },
+        {
+          "name": "vexclaw",
+          "player": false
+        }
+      ],
+      "assists": [],
+      "reason": "Killed at Level 388 by Amm Sky, Ohellnaw and vexclaw."
+    },
+    {
+      "victim": "Amm Sky",
+      "victim_level": 389,
+      "frag": false,
+      "position": null,
+      "assist": true,
+      "time": "2026-10-08T02:58:51Z",
+      "time_unix": 1791428331,
+      "killers": [
+        {
+          "name": "Amm Sky",
+          "player": true
+        },
+        {
+          "name": "vexclaw",
+          "player": false
+        }
+      ],
+      "assists": [
+        {
+          "name": "Ohellnaw",
+          "player": true
+        }
+      ],
+      "reason": "Killed at Level 389 by Amm Sky and vexclaw. Assisted by Ohellnaw."
+    }
+  ]
+}
