@@ -57,6 +57,13 @@ https://raw.githubusercontent.com/Ruslex1234/tibia-ops-config/refs/heads/main/.c
 - Duplicate names are ignored; characters not on their world's highscores are skipped
 - If `trolls.json` can't be fetched, alerts still run normally
 
+### Frag List
+
+Each run also checks the death list of every troll that plays on the same world as an alert character. A death is recorded in `frags.json` when an alert character is the **1st or 2nd killer**; assists and lower killer positions don't count. The character pages are the ones already fetched for exp tracking, so this adds no API requests.
+
+- Records are kept permanently (tibia.com only shows the last 30 days) and never duplicated
+- Each record has `killer`, `position` (1 or 2), `victim`, `victim_level`, `world`, `time` and the full death `reason`, newest first
+
 ### Highscore Lookup
 
 Each character's world comes from the character API, then the tracker finds them in that world's experience highscores (top 1000). Pages are cached per world, so each page is downloaded at most once per run no matter how many tracked characters share a world. If a lookup fails, the last known data is kept instead of being dropped.
@@ -83,6 +90,8 @@ The Discord webhook URL must be configured as a repository secret:
 
 - **`track_exp.py`**: Main Python script that handles tracking
 - **`exp.json`**: JSON file storing current experience data for all tracked characters
+- **`trolls_exp.json`**: Experience data for the troll list
+- **`frags.json`**: Troll deaths where an alert character was the 1st or 2nd killer
 - **`.github/workflows/track-exp.yml`**: GitHub Actions workflow configuration
 
 ## Workflow Schedule

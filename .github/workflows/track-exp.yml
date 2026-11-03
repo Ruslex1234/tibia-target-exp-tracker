@@ -42,7 +42,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          files="exp.json trolls_exp.json"
+          files="exp.json trolls_exp.json frags.json"
           branch="${GITHUB_REF_NAME}"
 
           # Keep this run's data aside, then for each attempt: start from the

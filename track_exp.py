@@ -3,7 +3,9 @@
 Tibia Experience Tracker
 Tracks player experience from TibiaData API and sends Discord notifications on changes.
 Two lists are tracked: alerts (one message per character to WEBHOOK) and trolls
-(one summary message per run to WEBHOOK_TROLL).
+(one summary message per run to WEBHOOK_TROLL). Troll deaths on an alert
+character's world where that alert character was the 1st or 2nd killer are kept
+in frags.json.
 """
 
 import json
@@ -24,6 +26,7 @@ TROLLS_URL = f"{CONFIG_BASE_URL}/trolls.json"
 TIBIADATA_API_BASE = "https://api.tibiadata.com/v5"
 EXP_JSON_PATH = "exp.json"
 TROLLS_EXP_JSON_PATH = "trolls_exp.json"
+FRAGS_JSON_PATH = "frags.json"
 DISCORD_WEBHOOK_URL = os.environ.get("WEBHOOK", "")
 TROLL_WEBHOOK_URL = os.environ.get("WEBHOOK_TROLL", "")
 HEADERS = {
@@ -83,6 +86,10 @@ def fetch_player_list(url: str, label: str) -> Optional[List[str]]:
         return None
 
 
+# lower requested name -> TibiaData "character" object (character info + deaths).
+# Filled by get_character_info so the frag list needs no extra requests.
+_character_cache: Dict = {}
+
 # world -> {"entries": {lower name: entry}, "next_page": int, "total_pages": int|None}
 # Shared by every list so a world's pages are fetched at most once per run.
 _highscore_cache: Dict = {}
@@ -93,6 +100,7 @@ def get_character_info(character_name: str) -> Optional[Dict]:
     try:
         encoded_name = urllib.parse.quote(character_name)
         data = http_json(f"{TIBIADATA_API_BASE}/character/{encoded_name}")
+        _character_cache[character_name.lower()] = (data or {}).get("character", {})
         character = (data or {}).get("character", {}).get("character", {})
         world = character.get("world")
         if not world:
@@ -191,6 +199,51 @@ def save_exp_data(data: Dict, path: str):
     except Exception as e:
         print(f"✗ Error saving {path}: {e}")
         sys.exit(1)
+
+
+def collect_frags(alerts: List[str], trolls: List[str], frags: List[Dict]) -> List[Dict]:
+    """Add troll deaths where an alert character was the 1st or 2nd killer.
+
+    Only trolls on an alert character's world are checked, and only the
+    killers list is read (assists don't count). Uses the character pages
+    already fetched this run. Returns the newly added records.
+    """
+    targets = {}  # lower alert name -> (name, world)
+    for name in alerts:
+        info = _character_cache.get(name.lower(), {}).get("character") or {}
+        if info.get("world"):
+            targets[info["name"].lower()] = (info["name"], info["world"])
+    target_worlds = {world for _, world in targets.values()}
+
+    seen = {(f["victim"], f["time"], f["killer"]) for f in frags}
+    added = []
+    for troll in trolls:
+        cached = _character_cache.get(troll.lower(), {})
+        victim = cached.get("character") or {}
+        if victim.get("world") not in target_worlds:
+            continue
+        for death in cached.get("deaths") or []:
+            for position, killer in enumerate((death.get("killers") or [])[:2], start=1):
+                target = targets.get((killer.get("name") or "").lower())
+                if not target or not killer.get("player") or target[1] != victim["world"]:
+                    continue
+                record = {
+                    "killer": target[0],
+                    "position": position,
+                    "victim": victim["name"],
+                    "victim_level": death.get("level", 0),
+                    "world": victim["world"],
+                    "time": death.get("time", ""),
+                    "reason": death.get("reason", ""),
+                }
+                key = (record["victim"], record["time"], record["killer"])
+                if key not in seen:
+                    seen.add(key)
+                    added.append(record)
+
+    frags.extend(added)
+    frags.sort(key=lambda f: f["time"], reverse=True)
+    return added
 
 
 def character_link(name: str) -> str:
@@ -477,6 +530,15 @@ def main():
             print(f"\nSending troll summary for {len(troll_changes)} change(s)")
             send_troll_summary(troll_changes)
 
+    # ---- Frags: troll deaths with an alert character as 1st/2nd killer ----
+    new_frags = []
+    if trolls is not None:
+        frags = load_exp_data(FRAGS_JSON_PATH) or []
+        new_frags = collect_frags(alerts, trolls, frags)
+        for f in new_frags:
+            print(f"  ⚔ {f['killer']} (#{f['position']}) killed {f['victim']} (level {f['victim_level']}) at {f['time']}")
+        save_exp_data(frags, FRAGS_JSON_PATH)
+
     print(f"\n{'=' * 60}")
     print(f"✓ Tracking complete!")
     print(f"  Alert characters tracked: {len(updated_data)}")
@@ -486,6 +548,7 @@ def main():
     if trolls is not None:
         print(f"  Troll characters tracked: {len(troll_updated)} of {len(trolls)}")
         print(f"  Troll experience changes: {len(troll_changes)}")
+        print(f"  New frags recorded: {len(new_frags)}")
     print("=" * 60)
 
 
