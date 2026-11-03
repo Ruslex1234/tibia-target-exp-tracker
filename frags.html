@@ -87,11 +87,9 @@
     return LIMITS.map(([, seconds]) => times.filter(t => now - t < seconds).length);
   }
   // Frags that can still be made without reaching any limit (so 2 per day at most).
-  const hasSkull = counts => counts.some((n, i) => n >= LIMITS[i][2]);
   function fragsLeft(counts) {
     return Math.max(0, Math.min(...LIMITS.map(([, , limit], i) => limit - 1 - counts[i])));
   }
-  const leftText = counts => hasSkull(counts) ? "Red skull" : String(fragsLeft(counts));
 
   function showIndex(data) {
     document.title = "Frag List";
@@ -102,8 +100,8 @@
       ? data.characters.map(c => {
           const counts = windowCounts(c), left = fragsLeft(counts);
           return `<tr><td>${subPage(c.killer)}</td><td>${esc(c.world)}</td>` +
-            counts.map((n, i) => `<td class="nowrap${n >= LIMITS[i][2] ? " danger" : ""}">${n} / ${LIMITS[i][2]}</td>`).join("") +
-            `<td class="nowrap${left === 0 ? " danger" : ""}">${leftText(counts)}</td></tr>`;
+            counts.map((n, i) => `<td class="nowrap">${n} / ${LIMITS[i][2]}</td>`).join("") +
+            `<td class="nowrap${left === 0 ? " danger" : ""}">${left}</td></tr>`;
         }).join("")
       : `<tr><td colspan="6">No alert characters.</td></tr>`;
   }
@@ -114,7 +112,7 @@
     const counts = windowCounts(c);
     document.getElementById("caption").textContent =
       `${c.killer} (${c.world}) - frags: ${counts.map((n, i) => `${n}/${LIMITS[i][2]} in ${LIMITS[i][0]}`).join(", ")}` +
-      ` - ${hasSkull(counts) ? "red skull" : fragsLeft(counts) + " left"}`;
+      ` - ${fragsLeft(counts)} left`;
     document.getElementById("head").innerHTML = `<tr><th class="nowrap">Date</th><th>Character</th><th>Death</th><th class="nowrap">Frag</th></tr>`;
     document.getElementById("rows").innerHTML = c.deaths.length
       ? c.deaths.map(d => `<tr>
