@@ -84,7 +84,7 @@ Each run rebuilds `frags.json` from scratch: every death from the last 30 days (
 }
 ```
 
-`frags.html` shows the list as a table with every time converted to the viewer's own timezone. It loads `frags.json` from the repo each time it opens, so it never needs rebuilding. Serve it with GitHub Pages (Settings, Pages, deploy from `main`, root) and open `/frags.html`.
+`frags.html` shows the list in the style of tibia.com's Character Deaths table, with every time converted to the viewer's own timezone. It loads `frags.json` from the repo each time it opens, so it never needs rebuilding. Serve it with GitHub Pages (Settings, Pages, deploy from `main`, root) and open `/frags.html`.
 
 ### Highscore Lookup
 
