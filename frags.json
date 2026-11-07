@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-07T03:09:28Z",
+  "updated_at": "2026-11-07T03:29:31Z",
   "characters": [
     {
       "killer": "Julio Warrior",
@@ -580,31 +580,6 @@
             }
           ],
           "reason": "Died at Level 385 by grimeleech. Assisted by Ohellnaw."
-        },
-        {
-          "victim": "Amm Sky",
-          "victim_level": 388,
-          "frag": true,
-          "position": 2,
-          "assist": false,
-          "time": "2026-10-08T03:15:37Z",
-          "time_unix": 1791429337,
-          "killers": [
-            {
-              "name": "Amm Sky",
-              "player": true
-            },
-            {
-              "name": "Ohellnaw",
-              "player": true
-            },
-            {
-              "name": "vexclaw",
-              "player": false
-            }
-          ],
-          "assists": [],
-          "reason": "Killed at Level 388 by Amm Sky, Ohellnaw and vexclaw."
         }
       ]
     }
