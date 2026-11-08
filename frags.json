@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-08T02:49:38Z",
+  "updated_at": "2026-11-08T03:09:35Z",
   "characters": [
     {
       "killer": "Julio Warrior",
@@ -537,27 +537,6 @@
             }
           ],
           "reason": "Died at Level 345 by raubritter chastener. Assisted by Ohellnaw."
-        },
-        {
-          "victim": "Amm Sky",
-          "victim_level": 385,
-          "frag": true,
-          "position": 1,
-          "assist": false,
-          "time": "2026-10-09T03:02:59Z",
-          "time_unix": 1791514979,
-          "killers": [
-            {
-              "name": "Ohellnaw",
-              "player": true
-            },
-            {
-              "name": "dark torturer",
-              "player": false
-            }
-          ],
-          "assists": [],
-          "reason": "Killed at Level 385 by Ohellnaw and dark torturer."
         }
       ]
     }
