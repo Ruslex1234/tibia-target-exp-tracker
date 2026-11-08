@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-08T13:49:33Z",
+  "updated_at": "2026-11-08T14:09:41Z",
   "characters": [
     {
       "killer": "Julio Warrior",
@@ -515,28 +515,6 @@
             }
           ],
           "reason": "Killed at Level 384 by Amm Sky and vexclaw. Assisted by Ohellnaw."
-        },
-        {
-          "victim": "Vian Chinan",
-          "victim_level": 345,
-          "frag": false,
-          "position": null,
-          "assist": true,
-          "time": "2026-10-09T13:53:42Z",
-          "time_unix": 1791554022,
-          "killers": [
-            {
-              "name": "raubritter chastener",
-              "player": false
-            }
-          ],
-          "assists": [
-            {
-              "name": "Ohellnaw",
-              "player": true
-            }
-          ],
-          "reason": "Died at Level 345 by raubritter chastener. Assisted by Ohellnaw."
         }
       ]
     }
