@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-11T00:49:38Z",
+  "updated_at": "2026-11-11T01:09:17Z",
   "characters": [
     {
       "killer": "Julio Warrior",
@@ -468,27 +468,6 @@
             }
           ],
           "reason": "Killed at Level 382 by Amm Sky and hellflayer. Assisted by Ohellnaw."
-        },
-        {
-          "victim": "Vian Chinan",
-          "victim_level": 344,
-          "frag": true,
-          "position": 1,
-          "assist": false,
-          "time": "2026-10-12T00:57:57Z",
-          "time_unix": 1791766677,
-          "killers": [
-            {
-              "name": "Ohellnaw",
-              "player": true
-            },
-            {
-              "name": "raubritter marksman",
-              "player": false
-            }
-          ],
-          "assists": [],
-          "reason": "Killed at Level 344 by Ohellnaw and raubritter marksman."
         }
       ]
     }
