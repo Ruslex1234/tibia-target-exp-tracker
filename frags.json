@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-15T23:09:47Z",
+  "updated_at": "2026-11-15T23:29:51Z",
   "characters": [
     {
       "killer": "Julio Warrior",
@@ -395,32 +395,6 @@
           ],
           "assists": [],
           "reason": "Killed at Level 479 by Ohellnaw and hellflayer."
-        },
-        {
-          "victim": "Amm Sky",
-          "victim_level": 376,
-          "frag": false,
-          "position": null,
-          "assist": true,
-          "time": "2026-10-16T23:18:40Z",
-          "time_unix": 1792192720,
-          "killers": [
-            {
-              "name": "Amm Sky",
-              "player": true
-            },
-            {
-              "name": "hellflayer",
-              "player": false
-            }
-          ],
-          "assists": [
-            {
-              "name": "Ohellnaw",
-              "player": true
-            }
-          ],
-          "reason": "Killed at Level 376 by Amm Sky and hellflayer. Assisted by Ohellnaw."
         }
       ]
     }
