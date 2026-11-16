@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-15T23:49:10Z",
+  "updated_at": "2026-11-16T00:09:36Z",
   "characters": [
     {
       "killer": "Julio Warrior",
@@ -374,27 +374,6 @@
             }
           ],
           "reason": "Died at Level 392 by norcferatu nightweaver. Assisted by Ohellnaw."
-        },
-        {
-          "victim": "Rodryk Style",
-          "victim_level": 479,
-          "frag": true,
-          "position": 1,
-          "assist": false,
-          "time": "2026-10-16T23:50:10Z",
-          "time_unix": 1792194610,
-          "killers": [
-            {
-              "name": "Ohellnaw",
-              "player": true
-            },
-            {
-              "name": "hellflayer",
-              "player": false
-            }
-          ],
-          "assists": [],
-          "reason": "Killed at Level 479 by Ohellnaw and hellflayer."
         }
       ]
     }
