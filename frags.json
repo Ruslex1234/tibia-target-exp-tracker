@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-21T18:09:43Z",
+  "updated_at": "2026-11-21T18:29:26Z",
   "characters": [
     {
       "killer": "Julio Warrior",
@@ -309,28 +309,6 @@
           ],
           "assists": [],
           "reason": "Killed at Level 390 by Ohellnaw and gloom maw."
-        },
-        {
-          "victim": "El Marino Loko",
-          "victim_level": 390,
-          "frag": false,
-          "position": null,
-          "assist": true,
-          "time": "2026-10-22T18:09:02Z",
-          "time_unix": 1792692542,
-          "killers": [
-            {
-              "name": "gloom maw",
-              "player": false
-            }
-          ],
-          "assists": [
-            {
-              "name": "Ohellnaw",
-              "player": true
-            }
-          ],
-          "reason": "Died at Level 390 by gloom maw. Assisted by Ohellnaw."
         }
       ]
     }
