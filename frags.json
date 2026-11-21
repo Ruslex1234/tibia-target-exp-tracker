@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-21T17:49:43Z",
+  "updated_at": "2026-11-21T18:09:43Z",
   "characters": [
     {
       "killer": "Julio Warrior",
@@ -331,49 +331,6 @@
             }
           ],
           "reason": "Died at Level 390 by gloom maw. Assisted by Ohellnaw."
-        },
-        {
-          "victim": "El Marino Loko",
-          "victim_level": 391,
-          "frag": true,
-          "position": 1,
-          "assist": false,
-          "time": "2026-10-22T17:59:42Z",
-          "time_unix": 1792691982,
-          "killers": [
-            {
-              "name": "Ohellnaw",
-              "player": true
-            },
-            {
-              "name": "gloom maw",
-              "player": false
-            }
-          ],
-          "assists": [],
-          "reason": "Killed at Level 391 by Ohellnaw and gloom maw."
-        },
-        {
-          "victim": "El Marino Loko",
-          "victim_level": 392,
-          "frag": false,
-          "position": null,
-          "assist": true,
-          "time": "2026-10-22T17:53:35Z",
-          "time_unix": 1792691615,
-          "killers": [
-            {
-              "name": "norcferatu nightweaver",
-              "player": false
-            }
-          ],
-          "assists": [
-            {
-              "name": "Ohellnaw",
-              "player": true
-            }
-          ],
-          "reason": "Died at Level 392 by norcferatu nightweaver. Assisted by Ohellnaw."
         }
       ]
     }
