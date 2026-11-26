@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-26T02:29:41Z",
+  "updated_at": "2026-11-26T02:49:39Z",
   "characters": [
     {
       "killer": "Julio Warrior",
@@ -267,27 +267,6 @@
           ],
           "assists": [],
           "reason": "Killed at Level 478 by Ohellnaw and grimeleech."
-        },
-        {
-          "victim": "Rodryk Style",
-          "victim_level": 479,
-          "frag": true,
-          "position": 1,
-          "assist": false,
-          "time": "2026-10-27T02:34:51Z",
-          "time_unix": 1793068491,
-          "killers": [
-            {
-              "name": "Ohellnaw",
-              "player": true
-            },
-            {
-              "name": "retching horror",
-              "player": false
-            }
-          ],
-          "assists": [],
-          "reason": "Killed at Level 479 by Ohellnaw and retching horror."
         }
       ]
     }
